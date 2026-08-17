@@ -1,0 +1,82 @@
+[
+  { "id":"chatgpt", "name":"ChatGPT", "category":"ai", "url":"https://chatgpt.com/" },
+  { "id":"openai-api", "name":"OpenAI API", "category":"ai", "url":"https://api.openai.com/v1/models" },
+  { "id":"gemini", "name":"Gemini", "category":"ai", "url":"https://gemini.google.com/" },
+  { "id":"gemini-api", "name":"Gemini API", "category":"ai", "url":"https://generativelanguage.googleapis.com/" },
+  { "id":"ai-studio", "name":"Google AI Studio", "category":"ai", "url":"https://aistudio.google.com/" },
+  { "id":"claude", "name":"Claude", "category":"ai", "url":"https://claude.ai/" },
+  { "id":"anthropic-api", "name":"Anthropic API", "category":"ai", "url":"https://api.anthropic.com/" },
+  { "id":"perplexity", "name":"Perplexity", "category":"ai", "url":"https://www.perplexity.ai/" },
+  { "id":"huggingface", "name":"Hugging Face", "category":"ai", "url":"https://huggingface.co/" },
+
+  { "id":"github", "name":"GitHub", "category":"dev", "url":"https://github.com/" },
+  { "id":"github-api", "name":"GitHub API", "category":"dev", "url":"https://api.github.com/" },
+  { "id":"github-raw", "name":"GitHub Raw", "category":"dev", "url":"https://raw.githubusercontent.com/" },
+  { "id":"docker", "name":"Docker Registry", "category":"dev", "url":"https://registry-1.docker.io/v2/" },
+  { "id":"npm", "name":"npm", "category":"dev", "url":"https://registry.npmjs.org/" },
+  { "id":"pypi", "name":"PyPI", "category":"dev", "url":"https://pypi.org/simple/" },
+  { "id":"nuget", "name":"NuGet", "category":"dev", "url":"https://api.nuget.org/v3/index.json" },
+  { "id":"vscode", "name":"VS Marketplace", "category":"dev", "url":"https://marketplace.visualstudio.com/" },
+  { "id":"jetbrains", "name":"JetBrains", "category":"dev", "url":"https://www.jetbrains.com/" },
+
+  { "id":"epic-store", "name":"Epic Games Store", "category":"game", "url":"https://store.epicgames.com/", "group":"Epic Games", "isPrimary":true },
+  { "id":"epic-account", "name":"Epic Account", "category":"game", "url":"https://www.epicgames.com/account/personal", "group":"Epic Games", "isPrimary":false },
+
+  { "id":"playstation-home", "name":"PlayStation", "category":"game", "url":"https://www.playstation.com/", "group":"PlayStation", "isPrimary":true },
+  { "id":"playstation-store", "name":"PlayStation Store", "category":"game", "url":"https://store.playstation.com/", "group":"PlayStation", "isPrimary":false },
+  { "id":"playstation-status", "name":"PlayStation Status", "category":"game", "url":"https://status.playstation.com/", "group":"PlayStation", "isPrimary":false },
+
+  { "id":"steam-store", "name":"Steam Store", "category":"game", "url":"https://store.steampowered.com/", "group":"Steam", "isPrimary":true },
+  { "id":"steam-community", "name":"Steam Community", "category":"game", "url":"https://steamcommunity.com/", "group":"Steam", "isPrimary":false },
+  { "id":"steam-api", "name":"Steam API", "category":"game", "url":"https://api.steampowered.com/", "group":"Steam", "isPrimary":false },
+
+  { "id":"xbox-home", "name":"Xbox", "category":"game", "url":"https://www.xbox.com/", "group":"Xbox", "isPrimary":true },
+  { "id":"xbox-account", "name":"Xbox Account", "category":"game", "url":"https://account.xbox.com/", "group":"Xbox", "isPrimary":false },
+  { "id":"xbox-support", "name":"Xbox Support", "category":"game", "url":"https://support.xbox.com/", "group":"Xbox", "isPrimary":false },
+
+  { "id":"riot-home", "name":"Riot Games", "category":"game", "url":"https://www.riotgames.com/", "group":"Riot / Valorant / LoL", "isPrimary":true },
+  { "id":"valorant-home", "name":"VALORANT", "category":"game", "url":"https://playvalorant.com/", "group":"Riot / Valorant / LoL", "isPrimary":false },
+  { "id":"lol-home", "name":"League of Legends", "category":"game", "url":"https://www.leagueoflegends.com/", "group":"Riot / Valorant / LoL", "isPrimary":false },
+
+  { "id":"blizzard-home", "name":"Blizzard", "category":"game", "url":"https://www.blizzard.com/", "group":"Battle.net", "isPrimary":true },
+  { "id":"battlenet-shop", "name":"Battle.net Shop", "category":"game", "url":"https://us.shop.battle.net/", "group":"Battle.net", "isPrimary":false },
+
+  { "id":"ea-home", "name":"EA", "category":"game", "url":"https://www.ea.com/", "group":"EA / Apex", "isPrimary":true },
+  { "id":"ea-help", "name":"EA Help", "category":"game", "url":"https://help.ea.com/", "group":"EA / Apex", "isPrimary":false },
+
+  { "id":"ubisoft-home", "name":"Ubisoft", "category":"game", "url":"https://www.ubisoft.com/", "group":"Ubisoft Connect", "isPrimary":true },
+  { "id":"ubisoft-store", "name":"Ubisoft Store", "category":"game", "url":"https://store.ubisoft.com/", "group":"Ubisoft Connect", "isPrimary":false },
+
+  { "id":"rockstar-home", "name":"Rockstar Games", "category":"game", "url":"https://www.rockstargames.com/", "group":"Rockstar / GTA", "isPrimary":true },
+  { "id":"rockstar-social", "name":"Rockstar Social Club", "category":"game", "url":"https://socialclub.rockstargames.com/", "group":"Rockstar / GTA", "isPrimary":false },
+
+  { "id":"nintendo-home", "name":"Nintendo", "category":"game", "url":"https://www.nintendo.com/", "group":"Nintendo", "isPrimary":true },
+  { "id":"nintendo-account", "name":"Nintendo Account", "category":"game", "url":"https://accounts.nintendo.com/", "group":"Nintendo", "isPrimary":false },
+
+  { "id":"gog-home", "name":"GOG", "category":"game", "url":"https://www.gog.com/", "group":"GOG", "isPrimary":true },
+  { "id":"gog-api", "name":"GOG API", "category":"game", "url":"https://api.gog.com/", "group":"GOG", "isPrimary":false },
+
+  { "id":"roblox-home", "name":"Roblox", "category":"game", "url":"https://www.roblox.com/", "group":"Roblox", "isPrimary":true },
+  { "id":"roblox-api", "name":"Roblox API", "category":"game", "url":"https://api.roblox.com/", "group":"Roblox", "isPrimary":false },
+
+  { "id":"minecraft-home", "name":"Minecraft", "category":"game", "url":"https://www.minecraft.net/", "group":"Minecraft", "isPrimary":true },
+  { "id":"minecraft-services", "name":"Minecraft Services", "category":"game", "url":"https://api.minecraftservices.com/", "group":"Minecraft", "isPrimary":false },
+
+  { "id":"cod-home", "name":"Call of Duty", "category":"game", "url":"https://www.callofduty.com/", "group":"Call of Duty", "isPrimary":true },
+  { "id":"cod-profile", "name":"Call of Duty Profile", "category":"game", "url":"https://profile.callofduty.com/", "group":"Call of Duty", "isPrimary":false },
+
+  { "id":"pubg-home", "name":"PUBG", "category":"game", "url":"https://pubg.com/", "group":"PUBG", "isPrimary":true },
+  { "id":"pubg-support", "name":"PUBG Support", "category":"game", "url":"https://support.pubg.com/", "group":"PUBG", "isPrimary":false },
+
+  { "id":"twitch-home", "name":"Twitch", "category":"game", "url":"https://www.twitch.tv/", "group":"Twitch", "isPrimary":true },
+  { "id":"twitch-api", "name":"Twitch API", "category":"game", "url":"https://api.twitch.tv/", "group":"Twitch", "isPrimary":false },
+
+  { "id":"gfn-home", "name":"GeForce NOW", "category":"game", "url":"https://www.nvidia.com/en-us/geforce-now/", "group":"GeForce NOW", "isPrimary":true },
+  { "id":"nvidia-home", "name":"NVIDIA", "category":"game", "url":"https://www.nvidia.com/", "group":"GeForce NOW", "isPrimary":false },
+
+  { "id":"discord-home", "name":"Discord", "category":"game", "url":"https://discord.com/", "group":"Discord", "isPrimary":true },
+  { "id":"discord-api", "name":"Discord API", "category":"game", "url":"https://discord.com/api/v10/gateway", "group":"Discord", "isPrimary":false },
+
+  { "id":"faceit-home", "name":"FACEIT", "category":"game", "url":"https://www.faceit.com/", "group":"FACEIT", "isPrimary":true },
+  { "id":"faceit-api", "name":"FACEIT API", "category":"game", "url":"https://open.faceit.com/", "group":"FACEIT", "isPrimary":false }
+]

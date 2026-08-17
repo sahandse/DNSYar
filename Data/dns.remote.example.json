@@ -1,0 +1,11 @@
+[
+  {
+    "id": "sample",
+    "name": "Sample DNS",
+    "primary": "203.0.113.10",
+    "secondary": "203.0.113.11",
+    "doH": null,
+    "categories": ["ai", "dev", "all"],
+    "description": "این فقط نمونه ساختار فایل بروزرسانی است؛ IPهای نمونه را با DNS واقعی جایگزین کنید."
+  }
+]
