@@ -2,6 +2,11 @@ name: Build DNSYar Windows
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag to publish a GitHub Release for (e.g. v0.7.2). Leave empty to just build.'
+        required: false
+        type: string
   push:
     branches:
       - main
@@ -71,10 +76,24 @@ jobs:
           path: Release/installer/*.exe
           if-no-files-found: error
 
+      - name: Determine release tag
+        id: release_tag
+        shell: pwsh
+        run: |
+          $tag = ""
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ github.event.inputs.release_tag }}" -ne "") {
+            $tag = "${{ github.event.inputs.release_tag }}"
+          } elseif ("${{ github.ref }}".StartsWith("refs/tags/v")) {
+            $tag = "${{ github.ref_name }}"
+          }
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: steps.release_tag.outputs.tag != ''
         uses: softprops/action-gh-release@v2
         with:
-          name: DNSYar ${{ github.ref_name }}
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: DNSYar ${{ steps.release_tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           generate_release_notes: true
           files: Release/installer/*.exe
