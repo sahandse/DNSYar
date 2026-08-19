@@ -51,4 +51,8 @@ Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "Launch {#MyAppName}"; Flags: nowait postinstall skipifsilent
+; DNSYar.exe's manifest requests requireAdministrator. Launching it directly here would use
+; CreateProcess, which does not honor that manifest and fails with error 740 ("requires
+; elevation") even though Setup itself is elevated. Routing through explorer.exe makes Windows
+; launch it the same way a shortcut double-click would, which correctly triggers the UAC prompt.
+Filename: "{win}\explorer.exe"; Parameters: """{app}\{#MyAppExeName}"""; Description: "Launch {#MyAppName}"; Flags: nowait postinstall skipifsilent
