@@ -55,6 +55,11 @@ public sealed partial class MainWindow : Window
         Activated += MainWindow_Activated;
         AppWindow.Closing += AppWindow_Closing;
         Closed += MainWindow_Closed;
+        if (AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.PreferredMinimumWidth = 760;
+            presenter.PreferredMinimumHeight = 560;
+        }
         try { SystemEvents.SessionEnding += SystemEvents_SessionEnding; } catch { }
         _catalogTimer.Interval = TimeSpan.FromMinutes(30);
         _catalogTimer.Tick += CatalogTimer_Tick;
@@ -99,6 +104,9 @@ public sealed partial class MainWindow : Window
 
         if (HeroVisual is not null)
             HeroVisual.Visibility = veryCompact ? Visibility.Collapsed : Visibility.Visible;
+
+        if (HeroButtonsPanel is not null)
+            HeroButtonsPanel.Orientation = veryCompact ? Orientation.Vertical : Orientation.Horizontal;
     }
 
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -1256,19 +1264,16 @@ public sealed partial class MainWindow : Window
     {
         var preset = themeName switch
         {
-            "Aurora" => new ThemePreset("Aurora", true, "#0A1020", "#16143B", "#07312D", "#A80B1020", "#784CFF", "#00C9A7", "#1C78FF", "#FF4FCB"),
-            "CyberNeon" => new ThemePreset("Cyber Neon", true, "#05060A", "#16051F", "#001C24", "#B805060A", "#FF00D4", "#6B00FF", "#00F5FF", "#7CFF00"),
-            "OceanDepth" => new ThemePreset("Ocean Depth", true, "#041421", "#062B43", "#021C32", "#B5041421", "#006DFF", "#00C7D9", "#00A0B8", "#5E7CFF"),
-            "Graphite3D" => new ThemePreset("Graphite 3D", true, "#111318", "#242932", "#0B0C10", "#B8111318", "#697586", "#2F3744", "#D4D9E2", "#8B5CFF"),
-            _ => new ThemePreset("Glass 3D", false, "#EEF4FF", "#F5EEFF", "#E8FBFA", "#B8FFFFFF", "#7A5CFF", "#4DDBFF", "#49D7B0", "#FF7FB8")
+            "Aurora" => new ThemePreset("Aurora", true, "#0B0F1A", "#10141F", "#DC10141F"),
+            "CyberNeon" => new ThemePreset("Neon", true, "#0A0A10", "#12111A", "#DC12111A"),
+            "OceanDepth" => new ThemePreset("Ocean", true, "#071722", "#0B2130", "#DC0B2130"),
+            "Graphite3D" => new ThemePreset("Graphite", true, "#111318", "#191C22", "#DC191C22"),
+            _ => new ThemePreset("روشن", false, "#F7F8FA", "#EEF1F5", "#F2FFFFFF")
         };
 
         RootGrid.RequestedTheme = preset.Dark ? ElementTheme.Dark : ElementTheme.Light;
-        ThemeBackdrop.Background = Gradient(preset.Background1, preset.Background2, preset.Background3);
+        ThemeBackdrop.Background = Gradient(preset.Background1, preset.Background2);
         NavView.Background = new SolidColorBrush(ParseColor(preset.Navigation));
-        OrbOne.Background = Gradient(preset.Orb1, preset.Orb2);
-        OrbTwo.Background = Gradient(preset.Orb3, preset.Orb1);
-        OrbThree.Background = Gradient(preset.Orb4, preset.Orb2);
         ThemeNameText.Text = preset.DisplayName;
     }
 
@@ -1308,12 +1313,7 @@ public sealed partial class MainWindow : Window
         bool Dark,
         string Background1,
         string Background2,
-        string Background3,
-        string Navigation,
-        string Orb1,
-        string Orb2,
-        string Orb3,
-        string Orb4);
+        string Navigation);
 
     private async void FontCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
