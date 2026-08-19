@@ -5,7 +5,10 @@
     xmlns:models="using:DNSYar.Models"
     Title="DNSYar">
 
-    <Grid x:Name="RootGrid" FlowDirection="RightToLeft" FontFamily="Vazirmatn" SizeChanged="RootGrid_SizeChanged">
+    <!-- Grid has no FontFamily property; a ContentControl host carries the app-wide font
+         so it cascades down through the Grid to every descendant. -->
+    <ContentControl x:Name="RootFontHost" FontFamily="Vazirmatn" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+    <Grid x:Name="RootGrid" FlowDirection="RightToLeft" SizeChanged="RootGrid_SizeChanged">
         <!-- Flat, minimal backdrop: a single subtle wash, no decorative glow shapes. -->
         <Grid x:Name="ThemeBackdrop" IsHitTestVisible="False" />
 
@@ -437,4 +440,5 @@
             </Grid>
         </NavigationView>
     </Grid>
+    </ContentControl>
 </Window>

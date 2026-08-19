@@ -134,7 +134,7 @@ public sealed partial class MainWindow : Window
             _targets = await _store.LoadTargetsAsync();
             UpdateCoverageCounters();
 
-            RootGrid.FontFamily = new FontFamily(_settings.FontFamily);
+            RootFontHost.FontFamily = new FontFamily(_settings.FontFamily);
             SelectFontInCombo(_settings.FontFamily);
             ApplyTheme(_settings.ThemeName);
             AutoUpdateToggle.IsOn = _settings.AutoUpdate;
@@ -1385,7 +1385,7 @@ public sealed partial class MainWindow : Window
     private async void FontCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (FontCombo.SelectedItem is not ComboBoxItem item || item.Content is not string family) return;
-        RootGrid.FontFamily = new FontFamily(family);
+        RootFontHost.FontFamily = new FontFamily(family);
         if (_initializing) return;
         _settings.FontFamily = family;
         await _store.SaveSettingsAsync(_settings);
