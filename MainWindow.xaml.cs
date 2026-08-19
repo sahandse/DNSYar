@@ -22,6 +22,7 @@ public sealed partial class MainWindow : Window
     private readonly BenchmarkService _benchmark = new();
     private readonly CatalogUpdater _updater = new();
     private readonly SiteProbeService _siteProbe = new();
+    private readonly AppUpdateChecker _appUpdateChecker = new();
     private readonly ObservableCollection<DnsProvider> _visibleProviders = new();
     private readonly ObservableCollection<SiteDnsTestResult> _siteResults = new();
     private readonly ObservableCollection<ServiceShowcaseItem> _showcaseItems = new();
@@ -127,6 +128,9 @@ public sealed partial class MainWindow : Window
     {
         try
         {
+            var appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            AppVersionText.Text = $"نسخه {appVersion?.ToString(3) ?? "؟"}";
+
             _settings = await _store.LoadSettingsAsync();
             if (string.IsNullOrWhiteSpace(_settings.UpdateUrl))
                 _settings.UpdateUrl = AppSettings.DefaultGithubUpdateUrl;
@@ -777,6 +781,34 @@ public sealed partial class MainWindow : Window
     }
 
     private async void ManualUpdate_Click(object sender, RoutedEventArgs e) => await TryUpdateCatalogAsync(silent: false);
+
+    private async void CheckForUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateStatusText.Text = "در حال بررسی…";
+        UpdateDownloadLink.Visibility = Visibility.Collapsed;
+        try
+        {
+            var current = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? new Version(0, 0, 0, 0);
+            var result = await _appUpdateChecker.CheckAsync(current);
+            if (result.UpdateAvailable)
+            {
+                UpdateStatusText.Text = $"نسخه جدید {result.LatestVersion} موجود است.";
+                var releaseUrl = string.IsNullOrWhiteSpace(result.ReleaseUrl)
+                    ? "https://github.com/sahandse/DNSYar/releases/latest"
+                    : result.ReleaseUrl;
+                UpdateDownloadLink.NavigateUri = new Uri(releaseUrl);
+                UpdateDownloadLink.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                UpdateStatusText.Text = "شما آخرین نسخه DNSYar را داری.";
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateStatusText.Text = $"بررسی بروزرسانی ناموفق بود: {ex.Message}";
+        }
+    }
 
     private async Task TryUpdateCatalogAsync(bool silent)
     {
