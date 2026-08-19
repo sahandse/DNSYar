@@ -11,7 +11,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.Win32;
 using Windows.Foundation;
 using Windows.UI;
-using Forms = System.Windows.Forms;
 
 namespace DNSYar;
 
@@ -72,7 +71,11 @@ public sealed partial class MainWindow : Window
         _tray.RunSmartNowRequested += () => RootGrid.DispatcherQueue.TryEnqueue(async () => await RunSmartAutoCycleAsync(silent: false, forceSelection: true));
         _tray.RestoreRequested += () => RootGrid.DispatcherQueue.TryEnqueue(async () => await RestoreAllFromTrayAsync());
         _tray.ExitRequested += () => RootGrid.DispatcherQueue.TryEnqueue(ExitFromTray);
-        _tray.ProviderRequested += provider => RootGrid.DispatcherQueue.TryEnqueue(async () => await ConnectAsync(provider, silent: true, origin: "Quick Switch"));
+        _tray.ProviderRequested += tray => RootGrid.DispatcherQueue.TryEnqueue(async () =>
+        {
+            var provider = _providers.FirstOrDefault(p => p.Id == tray.Id);
+            if (provider is not null) await ConnectAsync(provider, silent: true, origin: "Quick Switch");
+        });
         _tray.SmartAutoChanged += enabled => RootGrid.DispatcherQueue.TryEnqueue(async () => await SetSmartAutoEnabledAsync(enabled, fromTray: true));
     }
 
@@ -571,7 +574,7 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             if (!silent) ShowInfo("تغییر DNS ناموفق بود", ex.Message, InfoBarSeverity.Error);
-            else _tray.Notify("DNSYar — خطا", ex.Message, Forms.ToolTipIcon.Error);
+            else _tray.Notify("DNSYar — خطا", ex.Message, TrayNotifyIcon.Error);
             return false;
         }
         finally { if (!silent) SetBusy(false); }
@@ -1023,7 +1026,7 @@ public sealed partial class MainWindow : Window
     {
         if (!_settings.TrayEnabled || !_tray.IsInitialized) return;
         var active = _providers.FirstOrDefault(x => x.IsActive)?.Name ?? "خودکار / ناشناس";
-        _tray.Update(active, _settings.SmartAutoDnsEnabled, _providers);
+        _tray.Update(active, _settings.SmartAutoDnsEnabled, _providers.Select(p => new TrayProviderInfo(p.Id, p.Name, p.Score, p.IsActive, p.PingMs)));
     }
 
     private void ShowFromTray()
@@ -1177,7 +1180,7 @@ public sealed partial class MainWindow : Window
             }
             _smartAutoFailureStreak = 0;
             UpdateSmartAutoUi($"Failover انجام شد: {previous} ← {best.Name} • امتیاز {best.Score}/100");
-            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  امتیاز {best.Score}/100", Forms.ToolTipIcon.Info);
+            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  امتیاز {best.Score}/100", TrayNotifyIcon.Info);
             if (!silent) ShowInfo("Smart Auto DNS", $"بهترین گزینه انتخاب و فعال شد: {best.Name} ({best.Score}/100)", InfoBarSeverity.Success);
         }
         catch (Exception ex)

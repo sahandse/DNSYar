@@ -1,8 +1,17 @@
-using DNSYar.Models;
 using Forms = System.Windows.Forms;
 using Drawing = System.Drawing;
 
 namespace DNSYar.Services;
+
+public sealed record TrayProviderInfo(string Id, string Name, int Score, bool IsActive, double? PingMs);
+
+public enum TrayNotifyIcon
+{
+    None,
+    Info,
+    Warning,
+    Error
+}
 
 public sealed class TrayIconService : IDisposable
 {
@@ -17,7 +26,7 @@ public sealed class TrayIconService : IDisposable
     public event Action? RestoreRequested;
     public event Action? ExitRequested;
     public event Action<bool>? SmartAutoChanged;
-    public event Action<DnsProvider>? ProviderRequested;
+    public event Action<TrayProviderInfo>? ProviderRequested;
 
     public bool IsInitialized => _icon is not null;
 
@@ -77,7 +86,7 @@ public sealed class TrayIconService : IDisposable
         if (_icon is not null) _icon.Visible = visible;
     }
 
-    public void Update(string activeDnsName, bool smartEnabled, IEnumerable<DnsProvider> providers)
+    public void Update(string activeDnsName, bool smartEnabled, IEnumerable<TrayProviderInfo> providers)
     {
         if (_icon is null) return;
         if (_statusItem is not null) _statusItem.Text = $"DNS فعال: {activeDnsName}";
@@ -114,12 +123,18 @@ public sealed class TrayIconService : IDisposable
             _quickSwitchItem.DropDownItems.Add(new Forms.ToolStripMenuItem("DNSی موجود نیست") { Enabled = false });
     }
 
-    public void Notify(string title, string message, Forms.ToolTipIcon icon = Forms.ToolTipIcon.Info)
+    public void Notify(string title, string message, TrayNotifyIcon icon = TrayNotifyIcon.Info)
     {
         if (_icon is null || !_icon.Visible) return;
         _icon.BalloonTipTitle = title;
         _icon.BalloonTipText = message;
-        _icon.BalloonTipIcon = icon;
+        _icon.BalloonTipIcon = icon switch
+        {
+            TrayNotifyIcon.Error => Forms.ToolTipIcon.Error,
+            TrayNotifyIcon.Warning => Forms.ToolTipIcon.Warning,
+            TrayNotifyIcon.None => Forms.ToolTipIcon.None,
+            _ => Forms.ToolTipIcon.Info
+        };
         _icon.ShowBalloonTip(3500);
     }
 

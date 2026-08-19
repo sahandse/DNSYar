@@ -6,7 +6,6 @@
     <RootNamespace>DNSYar</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <UseWinUI>true</UseWinUI>
-    <UseWindowsForms>true</UseWindowsForms>
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
     <Nullable>enable</Nullable>
@@ -24,6 +23,21 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
     <PackageReference Include="Microsoft.Win32.SystemEvents" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Kept in its own non-WinUI project: mixing UseWindowsForms with WinUI XAML pages
+         in one project trips the WPF markup compiler (MC6000, PresentationCore/Framework). -->
+    <ProjectReference Include="DNSYar.Tray\DNSYar.Tray.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- DNSYar.Tray lives under this project's own directory; exclude its files from this
+         project's default globs so they aren't compiled twice. -->
+    <Compile Remove="DNSYar.Tray\**" />
+    <Content Remove="DNSYar.Tray\**" />
+    <EmbeddedResource Remove="DNSYar.Tray\**" />
+    <None Remove="DNSYar.Tray\**" />
   </ItemGroup>
 
   <ItemGroup>
