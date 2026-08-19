@@ -24,6 +24,7 @@ public sealed partial class MainWindow : Window
     private readonly SiteProbeService _siteProbe = new();
     private readonly ObservableCollection<DnsProvider> _visibleProviders = new();
     private readonly ObservableCollection<SiteDnsTestResult> _siteResults = new();
+    private readonly ObservableCollection<ServiceShowcaseItem> _showcaseItems = new();
     private readonly DispatcherTimer _catalogTimer = new();
     private readonly DispatcherTimer _autoDnsTimer = new();
     private readonly TrayIconService _tray = new();
@@ -51,6 +52,7 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         DnsList.ItemsSource = _visibleProviders;
         SiteTestList.ItemsSource = _siteResults;
+        ServiceShowcase.ItemsSource = _showcaseItems;
         NavView.SelectedItem = NavView.MenuItems[0];
         Activated += MainWindow_Activated;
         AppWindow.Closing += AppWindow_Closing;
@@ -202,8 +204,64 @@ public sealed partial class MainWindow : Window
                 _ => "نتایج کلی براساس سرعت DNS، Ping، Packet Loss و دسترسی واقعی سرویس‌ها مرتب می‌شوند."
             };
             UpdateListCoverageText();
+            UpdateServiceShowcase(tag);
             RefreshList();
         }
+    }
+
+    private static readonly string[] ShowcasePalette =
+    {
+        "#3B82F6", "#8B5CF6", "#06B6D4", "#22C55E", "#F59E0B",
+        "#EC4899", "#6366F1", "#F43F5E", "#14B8A6", "#A855F7"
+    };
+
+    private void UpdateServiceShowcase(string tag)
+    {
+        if (tag != "ai" && tag != "game")
+        {
+            ServiceShowcaseCard.Visibility = Visibility.Collapsed;
+            _showcaseItems.Clear();
+            return;
+        }
+
+        IEnumerable<string> names;
+        if (tag == "game")
+        {
+            ServiceShowcaseTitle.Text = "پلتفرم‌های بازی پوشش‌داده‌شده";
+            names = _targets
+                .Where(t => t.Category.Equals("game", StringComparison.OrdinalIgnoreCase))
+                .GroupBy(t => string.IsNullOrWhiteSpace(t.Group) ? t.Name : t.Group, StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.FirstOrDefault(t => t.IsPrimary)?.Name ?? g.First().Name);
+        }
+        else
+        {
+            ServiceShowcaseTitle.Text = "سرویس‌های هوش مصنوعی پوشش‌داده‌شده";
+            names = _targets
+                .Where(t => t.Category.Equals("ai", StringComparison.OrdinalIgnoreCase))
+                .Select(t => t.Name);
+        }
+
+        _showcaseItems.Clear();
+        foreach (var name in names)
+            _showcaseItems.Add(new ServiceShowcaseItem { Name = name, Initials = InitialsFor(name), Badge = BadgeBrushFor(name) });
+
+        ServiceShowcaseCard.Visibility = _showcaseItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private static string InitialsFor(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return $"{char.ToUpperInvariant(parts[0][0])}{char.ToUpperInvariant(parts[1][0])}";
+        if (parts.Length == 1) return parts[0].Length >= 2 ? parts[0][..2].ToUpperInvariant() : parts[0][..1].ToUpperInvariant();
+        return "?";
+    }
+
+    private static SolidColorBrush BadgeBrushFor(string name)
+    {
+        var hash = 0;
+        foreach (var c in name) hash = unchecked(hash * 31 + c);
+        var hex = ShowcasePalette[(hash & 0x7FFFFFFF) % ShowcasePalette.Length];
+        return new SolidColorBrush(ParseColor(hex));
     }
 
     private void RefreshList()

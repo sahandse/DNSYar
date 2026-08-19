@@ -181,7 +181,7 @@
 
                     <!-- DNS LIST / AI / DEV / GAME -->
                     <Grid x:Name="ListPage" Visibility="Collapsed" RowSpacing="12" MaxWidth="1320" HorizontalAlignment="Stretch">
-                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
 
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -196,7 +196,33 @@
                             </StackPanel>
                         </Grid>
 
-                        <Border Grid.Row="1" Style="{StaticResource SoftCardBorderStyle}" Padding="12">
+                        <Border x:Name="ServiceShowcaseCard" Grid.Row="1" Style="{StaticResource SoftCardBorderStyle}" Padding="14" Visibility="Collapsed">
+                            <StackPanel Spacing="10">
+                                <TextBlock x:Name="ServiceShowcaseTitle" Text="سرویس‌های پوشش‌داده‌شده" FontSize="12" Opacity="0.6" />
+                                <GridView x:Name="ServiceShowcase" SelectionMode="None" IsItemClickEnabled="False" Padding="0"
+                                          ScrollViewer.HorizontalScrollMode="Disabled" ScrollViewer.VerticalScrollMode="Disabled">
+                                    <GridView.ItemsPanel><ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal" /></ItemsPanelTemplate></GridView.ItemsPanel>
+                                    <GridView.ItemContainerStyle>
+                                        <Style TargetType="GridViewItem">
+                                            <Setter Property="Margin" Value="0,0,4,4" />
+                                            <Setter Property="Padding" Value="0" />
+                                        </Style>
+                                    </GridView.ItemContainerStyle>
+                                    <GridView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:ServiceShowcaseItem">
+                                            <StackPanel Width="78" Spacing="6" HorizontalAlignment="Center">
+                                                <Border Width="50" Height="50" CornerRadius="15" Background="{x:Bind Badge}" HorizontalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind Initials}" Foreground="White" FontWeight="SemiBold" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <TextBlock Text="{x:Bind Name}" FontSize="11" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Opacity="0.75" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridView.ItemTemplate>
+                                </GridView>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Row="2" Style="{StaticResource SoftCardBorderStyle}" Padding="12">
                             <Grid ColumnSpacing="10">
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                 <TextBox x:Name="DnsSearchBox" PlaceholderText="جستجو بین DNSها؛ نام یا IP..." TextChanged="DnsSearchBox_TextChanged" CornerRadius="10" />
@@ -206,7 +232,7 @@
                             </Grid>
                         </Border>
 
-                        <ListView x:Name="DnsList" Grid.Row="2" SelectionMode="None" Padding="0,2,0,20">
+                        <ListView x:Name="DnsList" Grid.Row="3" SelectionMode="None" Padding="0,2,0,20">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
