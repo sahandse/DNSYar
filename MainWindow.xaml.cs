@@ -228,6 +228,9 @@ public sealed partial class MainWindow : Window
         if (tag == "game")
         {
             ServiceShowcaseTitle.Text = "پلتفرم‌های بازی پوشش‌داده‌شده";
+            ServiceShowcaseIcon.Glyph = "\uE7FC";
+            ServiceShowcaseIconBadge.Background = new SolidColorBrush(ParseColor("#1822C55E"));
+            ServiceShowcaseIcon.Foreground = new SolidColorBrush(ParseColor("#34D399"));
             names = _targets
                 .Where(t => t.Category.Equals("game", StringComparison.OrdinalIgnoreCase))
                 .GroupBy(t => string.IsNullOrWhiteSpace(t.Group) ? t.Name : t.Group, StringComparer.OrdinalIgnoreCase)
@@ -236,6 +239,9 @@ public sealed partial class MainWindow : Window
         else
         {
             ServiceShowcaseTitle.Text = "سرویس‌های هوش مصنوعی پوشش‌داده‌شده";
+            ServiceShowcaseIcon.Glyph = "\uE99A";
+            ServiceShowcaseIconBadge.Background = new SolidColorBrush(ParseColor("#18A855F7"));
+            ServiceShowcaseIcon.Foreground = new SolidColorBrush(ParseColor("#C084FC"));
             names = _targets
                 .Where(t => t.Category.Equals("ai", StringComparison.OrdinalIgnoreCase))
                 .Select(t => t.Name);

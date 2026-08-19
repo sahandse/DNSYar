@@ -3,8 +3,14 @@ name: Build DNSYar Windows
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
+      - 'claude/**'
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -41,4 +47,26 @@ jobs:
         with:
           name: DNSYar-win-x64
           path: Release/win-x64/**
+          if-no-files-found: error
+
+      - name: Read version from csproj
+        id: version
+        shell: pwsh
+        run: |
+          $xml = [xml](Get-Content DNSYar.csproj)
+          $version = $xml.Project.PropertyGroup.Version | Select-Object -First 1
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build installer (Inno Setup)
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
+            /DMyAppVersion=${{ steps.version.outputs.version }} `
+            installer\DNSYar.iss
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DNSYar-Setup-${{ steps.version.outputs.version }}
+          path: Release/installer/*.exe
           if-no-files-found: error
