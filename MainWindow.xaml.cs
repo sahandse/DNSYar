@@ -139,7 +139,15 @@ public sealed partial class MainWindow : Window
             _targets = await _store.LoadTargetsAsync();
             UpdateCoverageCounters();
 
-            RootFontHost.FontFamily = new FontFamily(_settings.FontFamily);
+            try
+            {
+                RootFontHost.FontFamily = new FontFamily(_settings.FontFamily);
+            }
+            catch
+            {
+                _settings.FontFamily = "Vazirmatn";
+                RootFontHost.FontFamily = new FontFamily(_settings.FontFamily);
+            }
             SelectFontInCombo(_settings.FontFamily);
             ApplyTheme(_settings.ThemeName);
             AutoUpdateToggle.IsOn = _settings.AutoUpdate;
@@ -1420,7 +1428,15 @@ public sealed partial class MainWindow : Window
         if (FontCombo.SelectedItem is not ComboBoxItem item) return;
         var family = item.Tag as string ?? item.Content as string;
         if (string.IsNullOrWhiteSpace(family)) return;
-        RootFontHost.FontFamily = new FontFamily(family);
+        try
+        {
+            RootFontHost.FontFamily = new FontFamily(family);
+        }
+        catch (Exception ex)
+        {
+            ShowInfo("فونت اعمال نشد", ex.Message, InfoBarSeverity.Warning);
+            return;
+        }
         if (_initializing) return;
         _settings.FontFamily = family;
         await _store.SaveSettingsAsync(_settings);
