@@ -15,6 +15,7 @@
 #define MyAppURL "https://t.me/sahandse"
 #define MyAppExeName "DNSYar.exe"
 #define MyPublishDir "..\Release\win-x64"
+#define MyAppIcon "..\Assets\AppIcon.ico"
 
 [Setup]
 AppId={{6F2B6C7E-6C0A-4A1E-9C0D-6F0C1D2E9A31}
@@ -34,6 +35,7 @@ WizardStyle=modern
 ArchitecturesInstallIn64BitMode=x64
 ; DNSYar changes the active network adapter's DNS servers, which requires elevation.
 PrivilegesRequired=admin
+SetupIconFile={#MyAppIcon}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Languages]

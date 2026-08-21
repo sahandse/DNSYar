@@ -36,7 +36,7 @@ public sealed class TrayIconService : IDisposable
 
         _icon = new Forms.NotifyIcon
         {
-            Icon = Drawing.SystemIcons.Application,
+            Icon = TryGetAppIcon() ?? Drawing.SystemIcons.Application,
             Text = "DNSYar — Smart DNS Manager",
             Visible = true
         };
@@ -145,5 +145,18 @@ public sealed class TrayIconService : IDisposable
         _icon.ContextMenuStrip?.Dispose();
         _icon.Dispose();
         _icon = null;
+    }
+
+    private static Drawing.Icon? TryGetAppIcon()
+    {
+        try
+        {
+            var path = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+            return string.IsNullOrEmpty(path) ? null : Drawing.Icon.ExtractAssociatedIcon(path);
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
