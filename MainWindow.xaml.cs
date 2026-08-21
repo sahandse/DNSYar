@@ -1417,7 +1417,9 @@ public sealed partial class MainWindow : Window
 
     private async void FontCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (FontCombo.SelectedItem is not ComboBoxItem item || item.Content is not string family) return;
+        if (FontCombo.SelectedItem is not ComboBoxItem item) return;
+        var family = item.Tag as string ?? item.Content as string;
+        if (string.IsNullOrWhiteSpace(family)) return;
         RootFontHost.FontFamily = new FontFamily(family);
         if (_initializing) return;
         _settings.FontFamily = family;
@@ -1428,7 +1430,8 @@ public sealed partial class MainWindow : Window
     {
         foreach (var item in FontCombo.Items.OfType<ComboBoxItem>())
         {
-            if (string.Equals(item.Content?.ToString(), family, StringComparison.OrdinalIgnoreCase))
+            var value = item.Tag as string ?? item.Content as string;
+            if (string.Equals(value, family, StringComparison.OrdinalIgnoreCase))
             {
                 FontCombo.SelectedItem = item;
                 return;
