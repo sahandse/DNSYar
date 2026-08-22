@@ -5,28 +5,12 @@
     xmlns:models="using:DNSYar.Models"
     Title="DNSYar">
 
-    <Grid x:Name="RootGrid" FlowDirection="RightToLeft" FontFamily="Vazirmatn" SizeChanged="RootGrid_SizeChanged">
-        <!-- Local vector/gradient backdrop: no network image dependency. -->
-        <Grid x:Name="ThemeBackdrop" IsHitTestVisible="False">
-            <Border x:Name="OrbOne" Width="460" Height="460" CornerRadius="230"
-                    HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-160,-190,0,0" Opacity="0.80">
-                <Grid>
-                    <Border Width="185" Height="64" CornerRadius="32" Background="#28FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="72,62,0,0" />
-                    <Border Width="315" Height="315" CornerRadius="158" BorderThickness="1" BorderBrush="#25FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-            <Border x:Name="OrbTwo" Width="330" Height="330" CornerRadius="165"
-                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,105,-85,0" Opacity="0.72">
-                <Grid>
-                    <Border Width="115" Height="42" CornerRadius="21" Background="#25FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="48,42,0,0" />
-                    <Border Width="215" Height="215" CornerRadius="108" BorderThickness="1" BorderBrush="#22FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                </Grid>
-            </Border>
-            <Border x:Name="OrbThree" Width="255" Height="255" CornerRadius="128"
-                    HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="190,0,0,-105" Opacity="0.68">
-                <Border Width="86" Height="30" CornerRadius="15" Background="#25FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="42,36,0,0" />
-            </Border>
-        </Grid>
+    <!-- Grid has no FontFamily property; a ContentControl host carries the app-wide font
+         so it cascades down through the Grid to every descendant. -->
+    <ContentControl x:Name="RootFontHost" FontFamily="Vazirmatn" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+    <Grid x:Name="RootGrid" FlowDirection="RightToLeft" SizeChanged="RootGrid_SizeChanged">
+        <!-- Flat, minimal backdrop: a single subtle wash, no decorative glow shapes. -->
+        <Grid x:Name="ThemeBackdrop" IsHitTestVisible="False" />
 
         <NavigationView x:Name="NavView"
                         IsBackButtonVisible="Collapsed"
@@ -84,17 +68,10 @@
                     <!-- HOME -->
                     <ScrollViewer x:Name="HomePage" VerticalScrollBarVisibility="Auto">
                         <StackPanel Spacing="16" MaxWidth="1320" HorizontalAlignment="Stretch" Padding="0,4,0,22">
-                            <Border CornerRadius="26" Padding="24" BorderThickness="1" BorderBrush="#22FFFFFF">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="#68256BEB" Offset="0" />
-                                        <GradientStop Color="#3B06B6D4" Offset="0.55" />
-                                        <GradientStop Color="#2410B981" Offset="1" />
-                                    </LinearGradientBrush>
-                                </Border.Background>
+                            <Border Style="{StaticResource CardBorderStyle}" Padding="24">
                                 <Grid ColumnSpacing="18">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                    <StackPanel Spacing="9">
+                                    <StackPanel Spacing="9" Grid.Column="0">
                                         <Border Style="{StaticResource PillBorderStyle}" HorizontalAlignment="Right">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <Ellipse Width="7" Height="7" Fill="#22C55E" VerticalAlignment="Center" />
@@ -103,17 +80,14 @@
                                         </Border>
                                         <TextBlock Text="DNS مناسب را هوشمند پیدا کن" Style="{StaticResource PageTitleStyle}" />
                                         <TextBlock Text="سرعت، DNS Resolve و دسترسی واقعی AI، ابزارهای برنامه‌نویسی و سرویس‌های بازی را با هم مقایسه کن." Style="{StaticResource SubtleTextStyle}" MaxWidth="760" />
-                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,5,0,0">
+                                        <StackPanel x:Name="HeroButtonsPanel" Orientation="Horizontal" Spacing="8" Margin="0,5,0,0">
                                             <Button Content="تست همه DNSها" Click="TestAll_Click" Style="{StaticResource AccentButtonStyle}" Padding="18,10" CornerRadius="12" />
                                             <Button Content="Smart Auto الآن" Click="SmartRunNow_Click" Style="{StaticResource SecondaryActionButtonStyle}" />
                                             <Button Content="بازگشت DNS قبلی" Click="Restore_Click" Style="{StaticResource SecondaryActionButtonStyle}" />
                                         </StackPanel>
                                     </StackPanel>
-                                    <Border x:Name="HeroVisual" Grid.Column="1" Width="112" Height="112" CornerRadius="56" BorderThickness="1" BorderBrush="#40FFFFFF" VerticalAlignment="Center">
-                                        <Grid>
-                                            <Border Width="86" Height="86" CornerRadius="43" Background="#18FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            <FontIcon Glyph="&#xE968;" FontSize="38" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Grid>
+                                    <Border x:Name="HeroVisual" Grid.Column="1" Width="44" Height="44" CornerRadius="14" Background="{ThemeResource AccentFillColorDefaultBrush}" VerticalAlignment="Center">
+                                        <FontIcon Glyph="&#xE968;" FontSize="19" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
                                 </Grid>
                             </Border>
@@ -210,7 +184,7 @@
 
                     <!-- DNS LIST / AI / DEV / GAME -->
                     <Grid x:Name="ListPage" Visibility="Collapsed" RowSpacing="12" MaxWidth="1320" HorizontalAlignment="Stretch">
-                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
 
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -225,7 +199,38 @@
                             </StackPanel>
                         </Grid>
 
-                        <Border Grid.Row="1" Style="{StaticResource SoftCardBorderStyle}" Padding="12">
+                        <Border x:Name="ServiceShowcaseCard" Grid.Row="1" Style="{StaticResource SoftCardBorderStyle}" Padding="14" Visibility="Collapsed">
+                            <StackPanel Spacing="12">
+                                <StackPanel Orientation="Horizontal" Spacing="9">
+                                    <Border x:Name="ServiceShowcaseIconBadge" Width="30" Height="30" CornerRadius="10">
+                                        <FontIcon x:Name="ServiceShowcaseIcon" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <TextBlock x:Name="ServiceShowcaseTitle" Text="سرویس‌های پوشش‌داده‌شده" FontSize="12" Opacity="0.65" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <GridView x:Name="ServiceShowcase" SelectionMode="None" IsItemClickEnabled="False" Padding="0"
+                                          ScrollViewer.HorizontalScrollMode="Disabled" ScrollViewer.VerticalScrollMode="Disabled">
+                                    <GridView.ItemsPanel><ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal" /></ItemsPanelTemplate></GridView.ItemsPanel>
+                                    <GridView.ItemContainerStyle>
+                                        <Style TargetType="GridViewItem">
+                                            <Setter Property="Margin" Value="0,0,4,4" />
+                                            <Setter Property="Padding" Value="0" />
+                                        </Style>
+                                    </GridView.ItemContainerStyle>
+                                    <GridView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:ServiceShowcaseItem">
+                                            <StackPanel Width="78" Spacing="6" HorizontalAlignment="Center">
+                                                <Border Width="50" Height="50" CornerRadius="15" Background="{x:Bind Badge}" HorizontalAlignment="Center">
+                                                    <TextBlock Text="{x:Bind Initials}" Foreground="White" FontWeight="SemiBold" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <TextBlock Text="{x:Bind Name}" FontSize="11" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" Opacity="0.75" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridView.ItemTemplate>
+                                </GridView>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Row="2" Style="{StaticResource SoftCardBorderStyle}" Padding="12">
                             <Grid ColumnSpacing="10">
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                 <TextBox x:Name="DnsSearchBox" PlaceholderText="جستجو بین DNSها؛ نام یا IP..." TextChanged="DnsSearchBox_TextChanged" CornerRadius="10" />
@@ -235,7 +240,7 @@
                             </Grid>
                         </Border>
 
-                        <ListView x:Name="DnsList" Grid.Row="2" SelectionMode="None" Padding="0,2,0,20">
+                        <ListView x:Name="DnsList" Grid.Row="3" SelectionMode="None" Padding="0,2,0,20">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -350,16 +355,16 @@
 
                             <Border Style="{StaticResource CardBorderStyle}">
                                 <StackPanel Spacing="12">
-                                    <StackPanel Orientation="Horizontal" Spacing="9"><Border Width="38" Height="38" CornerRadius="12" Background="#18A855F7"><FontIcon Glyph="&#xE790;" Foreground="#C084FC" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><StackPanel><TextBlock Text="ظاهر برنامه" Style="{StaticResource SectionTitleStyle}"/><TextBlock Text="فونت و تم سه‌بعدی" FontSize="11" Opacity="0.55"/></StackPanel></StackPanel>
-                                    <Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="فونت رابط کاربری" Opacity="0.68"/><ComboBox x:Name="FontCombo" SelectionChanged="FontCombo_SelectionChanged" HorizontalAlignment="Stretch"><ComboBoxItem Content="Vazirmatn"/><ComboBoxItem Content="IRANSans"/><ComboBoxItem Content="Segoe UI"/></ComboBox></StackPanel><StackPanel Grid.Column="1" Spacing="5"><TextBlock Text="تم فعال" Opacity="0.68"/><Border Style="{StaticResource SoftCardBorderStyle}" Padding="10"><TextBlock x:Name="ThemeNameText" Text="Glass 3D" FontWeight="SemiBold"/></Border></StackPanel></Grid>
+                                    <StackPanel Orientation="Horizontal" Spacing="9"><Border Width="38" Height="38" CornerRadius="12" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><FontIcon Glyph="&#xE790;" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><StackPanel><TextBlock Text="ظاهر برنامه" Style="{StaticResource SectionTitleStyle}"/><TextBlock Text="فونت و تم رنگی" FontSize="11" Opacity="0.55"/></StackPanel></StackPanel>
+                                    <Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="فونت رابط کاربری" Opacity="0.68"/><ComboBox x:Name="FontCombo" SelectionChanged="FontCombo_SelectionChanged" HorizontalAlignment="Stretch"><ComboBoxItem Content="Vazirmatn"/><ComboBoxItem Content="IRANSans"/><ComboBoxItem Content="Segoe UI"/></ComboBox></StackPanel><StackPanel Grid.Column="1" Spacing="5"><TextBlock Text="تم فعال" Opacity="0.68"/><Border Style="{StaticResource SoftCardBorderStyle}" Padding="10"><TextBlock x:Name="ThemeNameText" Text="روشن" FontWeight="SemiBold"/></Border></StackPanel></Grid>
                                     <TextBlock Text="Vazirmatn و IRANSans باید روی ویندوز نصب باشند. فایل فونت داخل پروژه توزیع نشده است." FontSize="11" Opacity="0.55" TextWrapping="Wrap"/>
                                     <GridView SelectionMode="None" ScrollViewer.HorizontalScrollMode="Disabled" ScrollViewer.VerticalScrollMode="Disabled">
                                         <GridView.ItemsPanel><ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal"/></ItemsPanelTemplate></GridView.ItemsPanel>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="Glass3D" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#7A5CFF"/><GradientStop Color="#4DDBFF" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Glass 3D" HorizontalAlignment="Center"/></StackPanel></Button>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="Aurora" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#6A46FF"/><GradientStop Color="#00C9A7" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Aurora" HorizontalAlignment="Center"/></StackPanel></Button>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="CyberNeon" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FF00D4"/><GradientStop Color="#00F5FF" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Cyber Neon" HorizontalAlignment="Center"/></StackPanel></Button>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="OceanDepth" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#0057B8"/><GradientStop Color="#00B6D6" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Ocean Depth" HorizontalAlignment="Center"/></StackPanel></Button>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="Graphite3D" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#5B6472"/><GradientStop Color="#171A21" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Graphite 3D" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="140" Margin="0,0,8,8" Tag="Glass3D" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="40" Width="113" CornerRadius="10" Background="#F1F3F6" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"/><TextBlock Text="روشن" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="140" Margin="0,0,8,8" Tag="Aurora" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="40" Width="113" CornerRadius="10" Background="#10141F"/><TextBlock Text="Aurora" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="140" Margin="0,0,8,8" Tag="CyberNeon" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="40" Width="113" CornerRadius="10" Background="#12111A"/><TextBlock Text="Neon" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="140" Margin="0,0,8,8" Tag="OceanDepth" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="40" Width="113" CornerRadius="10" Background="#0B2130"/><TextBlock Text="Ocean" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="140" Margin="0,0,8,8" Tag="Graphite3D" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="40" Width="113" CornerRadius="10" Background="#191C22"/><TextBlock Text="Graphite" HorizontalAlignment="Center"/></StackPanel></Button>
                                     </GridView>
                                 </StackPanel>
                             </Border>
@@ -421,7 +426,18 @@
                             </Border>
 
                             <Border Style="{StaticResource CardBorderStyle}">
-                                <Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="درباره DNSYar" Style="{StaticResource SectionTitleStyle}"/><TextBlock Text="مدیریت هوشمند DNS برای ویندوز" Opacity="0.6"/><TextBlock Text="سازنده: سهند رضوان" FontWeight="SemiBold"/></StackPanel><HyperlinkButton Grid.Column="1" Content="t.me/sahandse" NavigateUri="https://t.me/sahandse" VerticalAlignment="Center"/></Grid>
+                                <StackPanel Spacing="14">
+                                    <Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="درباره DNSYar" Style="{StaticResource SectionTitleStyle}"/><TextBlock Text="مدیریت هوشمند DNS برای ویندوز" Opacity="0.6"/><TextBlock Text="سازنده: سهند رضوان" FontWeight="SemiBold"/><TextBlock x:Name="AppVersionText" Text="نسخه —" FontSize="11" Opacity="0.55" FlowDirection="LeftToRight" HorizontalAlignment="Right"/></StackPanel><HyperlinkButton Grid.Column="1" Content="t.me/sahandse" NavigateUri="https://t.me/sahandse" VerticalAlignment="Center"/></Grid>
+                                    <Border Style="{StaticResource SoftCardBorderStyle}" Padding="12">
+                                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="3">
+                                                <TextBlock x:Name="UpdateStatusText" Text="برای بررسی نسخه جدید کلیک کن" FontSize="12" Opacity="0.7" TextWrapping="Wrap"/>
+                                                <HyperlinkButton x:Name="UpdateDownloadLink" Content="دانلود نسخه جدید" Visibility="Collapsed" FontSize="12" Padding="0"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="1" Content="بررسی بروزرسانی" Click="CheckForUpdate_Click" Style="{StaticResource SecondaryActionButtonStyle}" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
@@ -435,4 +451,5 @@
             </Grid>
         </NavigationView>
     </Grid>
+    </ContentControl>
 </Window>

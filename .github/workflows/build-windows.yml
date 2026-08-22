@@ -2,15 +2,26 @@ name: Build DNSYar Windows
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag to publish a GitHub Release for (e.g. v0.7.2). Leave empty to just build.'
+        required: false
+        type: string
   push:
+    branches:
+      - main
+      - 'claude/**'
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout
@@ -36,9 +47,89 @@ jobs:
             -p:PublishSingleFile=false `
             -o .\Release\win-x64
 
+      - name: Diagnose resources.pri (search whole workspace, do not fail build)
+        shell: pwsh
+        run: |
+          Write-Host "=== Searching entire workspace for *.pri files ==="
+          $all = Get-ChildItem -Path "." -Filter "*.pri" -Recurse -ErrorAction SilentlyContinue
+          if ($all) {
+            $all | ForEach-Object { Write-Host "$($_.FullName)  ($($_.Length) bytes, modified $($_.LastWriteTime))" }
+          } else {
+            Write-Host "No *.pri files found anywhere under the workspace."
+          }
+
+          Write-Host ""
+          Write-Host "=== obj\ directory tree (depth-limited) for DNSYar ==="
+          if (Test-Path "obj") {
+            Get-ChildItem -Path "obj" -Recurse -Directory -ErrorAction SilentlyContinue |
+              Select-Object -First 60 -ExpandProperty FullName | ForEach-Object { Write-Host $_ }
+          } else {
+            Write-Host "No obj\ directory found at repo root."
+          }
+
+          Write-Host ""
+          Write-Host "=== Re-running publish with detailed verbosity, grepping for Pri-related targets ==="
+          dotnet publish DNSYar.csproj -c Release -r win-x64 --self-contained true `
+            -p:Platform=x64 -p:WindowsAppSDKSelfContained=true -p:PublishSingleFile=false `
+            -o .\Release\win-x64-diag -v:detailed *> publish-detailed.log
+          Select-String -Path publish-detailed.log -Pattern "Pri|MakePri|ProjectPriFile" -SimpleMatch:$false |
+            Select-Object -First 100 | ForEach-Object { Write-Host $_.Line }
+
+      - name: Upload diagnostic log artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pri-diagnostics
+          path: publish-detailed.log
+          if-no-files-found: warn
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: DNSYar-win-x64
           path: Release/win-x64/**
           if-no-files-found: error
+
+      - name: Read version from csproj
+        id: version
+        shell: pwsh
+        run: |
+          $xml = [xml](Get-Content DNSYar.csproj)
+          $version = $xml.Project.PropertyGroup.Version | Select-Object -First 1
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build installer (Inno Setup)
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
+            /DMyAppVersion=${{ steps.version.outputs.version }} `
+            installer\DNSYar.iss
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DNSYar-Setup-${{ steps.version.outputs.version }}
+          path: Release/installer/*.exe
+          if-no-files-found: error
+
+      - name: Determine release tag
+        id: release_tag
+        shell: pwsh
+        run: |
+          $tag = ""
+          if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ github.event.inputs.release_tag }}" -ne "") {
+            $tag = "${{ github.event.inputs.release_tag }}"
+          } elseif ("${{ github.ref }}".StartsWith("refs/tags/v")) {
+            $tag = "${{ github.ref_name }}"
+          }
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: steps.release_tag.outputs.tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: DNSYar ${{ steps.release_tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          files: Release/installer/*.exe

@@ -5,8 +5,8 @@
     <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <RootNamespace>DNSYar</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
     <UseWinUI>true</UseWinUI>
-    <UseWindowsForms>true</UseWindowsForms>
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
     <Nullable>enable</Nullable>
@@ -15,15 +15,30 @@
     <Authors>سهند رضوان</Authors>
     <Company>سهند رضوان</Company>
     <Product>DNSYar</Product>
-    <Version>0.7.1</Version>
-    <AssemblyVersion>0.7.1.0</AssemblyVersion>
-    <FileVersion>0.7.1.0</FileVersion>
+    <Version>0.7.9</Version>
+    <AssemblyVersion>0.7.9.0</AssemblyVersion>
+    <FileVersion>0.7.9.0</FileVersion>
     <Description>مدیریت هوشمند DNS برای ویندوز — ساخته‌شده توسط سهند رضوان</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
     <PackageReference Include="Microsoft.Win32.SystemEvents" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Kept in its own non-WinUI project: mixing UseWindowsForms with WinUI XAML pages
+         in one project trips the WPF markup compiler (MC6000, PresentationCore/Framework). -->
+    <ProjectReference Include="DNSYar.Tray\DNSYar.Tray.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- DNSYar.Tray lives under this project's own directory; exclude its files from this
+         project's default globs so they aren't compiled twice. -->
+    <Compile Remove="DNSYar.Tray\**" />
+    <Content Remove="DNSYar.Tray\**" />
+    <EmbeddedResource Remove="DNSYar.Tray\**" />
+    <None Remove="DNSYar.Tray\**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.ComponentModel;
 using DNSYar.Models;
 using DNSYar.Services;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -11,7 +12,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.Win32;
 using Windows.Foundation;
 using Windows.UI;
-using Forms = System.Windows.Forms;
 
 namespace DNSYar;
 
@@ -22,8 +22,10 @@ public sealed partial class MainWindow : Window
     private readonly BenchmarkService _benchmark = new();
     private readonly CatalogUpdater _updater = new();
     private readonly SiteProbeService _siteProbe = new();
+    private readonly AppUpdateChecker _appUpdateChecker = new();
     private readonly ObservableCollection<DnsProvider> _visibleProviders = new();
     private readonly ObservableCollection<SiteDnsTestResult> _siteResults = new();
+    private readonly ObservableCollection<ServiceShowcaseItem> _showcaseItems = new();
     private readonly DispatcherTimer _catalogTimer = new();
     private readonly DispatcherTimer _autoDnsTimer = new();
     private readonly TrayIconService _tray = new();
@@ -51,10 +53,16 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         DnsList.ItemsSource = _visibleProviders;
         SiteTestList.ItemsSource = _siteResults;
+        ServiceShowcase.ItemsSource = _showcaseItems;
         NavView.SelectedItem = NavView.MenuItems[0];
         Activated += MainWindow_Activated;
         AppWindow.Closing += AppWindow_Closing;
         Closed += MainWindow_Closed;
+        if (AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.PreferredMinimumWidth = 760;
+            presenter.PreferredMinimumHeight = 560;
+        }
         try { SystemEvents.SessionEnding += SystemEvents_SessionEnding; } catch { }
         _catalogTimer.Interval = TimeSpan.FromMinutes(30);
         _catalogTimer.Tick += CatalogTimer_Tick;
@@ -65,7 +73,11 @@ public sealed partial class MainWindow : Window
         _tray.RunSmartNowRequested += () => RootGrid.DispatcherQueue.TryEnqueue(async () => await RunSmartAutoCycleAsync(silent: false, forceSelection: true));
         _tray.RestoreRequested += () => RootGrid.DispatcherQueue.TryEnqueue(async () => await RestoreAllFromTrayAsync());
         _tray.ExitRequested += () => RootGrid.DispatcherQueue.TryEnqueue(ExitFromTray);
-        _tray.ProviderRequested += provider => RootGrid.DispatcherQueue.TryEnqueue(async () => await ConnectAsync(provider, silent: true, origin: "Quick Switch"));
+        _tray.ProviderRequested += tray => RootGrid.DispatcherQueue.TryEnqueue(async () =>
+        {
+            var provider = _providers.FirstOrDefault(p => p.Id == tray.Id);
+            if (provider is not null) await ConnectAsync(provider, silent: true, origin: "Quick Switch");
+        });
         _tray.SmartAutoChanged += enabled => RootGrid.DispatcherQueue.TryEnqueue(async () => await SetSmartAutoEnabledAsync(enabled, fromTray: true));
     }
 
@@ -99,6 +111,9 @@ public sealed partial class MainWindow : Window
 
         if (HeroVisual is not null)
             HeroVisual.Visibility = veryCompact ? Visibility.Collapsed : Visibility.Visible;
+
+        if (HeroButtonsPanel is not null)
+            HeroButtonsPanel.Orientation = veryCompact ? Orientation.Vertical : Orientation.Horizontal;
     }
 
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -113,6 +128,9 @@ public sealed partial class MainWindow : Window
     {
         try
         {
+            var appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            AppVersionText.Text = $"نسخه {appVersion?.ToString(3) ?? "؟"}";
+
             _settings = await _store.LoadSettingsAsync();
             if (string.IsNullOrWhiteSpace(_settings.UpdateUrl))
                 _settings.UpdateUrl = AppSettings.DefaultGithubUpdateUrl;
@@ -121,7 +139,15 @@ public sealed partial class MainWindow : Window
             _targets = await _store.LoadTargetsAsync();
             UpdateCoverageCounters();
 
-            RootGrid.FontFamily = new FontFamily(_settings.FontFamily);
+            try
+            {
+                RootFontHost.FontFamily = new FontFamily(_settings.FontFamily);
+            }
+            catch
+            {
+                _settings.FontFamily = "Vazirmatn";
+                RootFontHost.FontFamily = new FontFamily(_settings.FontFamily);
+            }
             SelectFontInCombo(_settings.FontFamily);
             ApplyTheme(_settings.ThemeName);
             AutoUpdateToggle.IsOn = _settings.AutoUpdate;
@@ -194,8 +220,70 @@ public sealed partial class MainWindow : Window
                 _ => "نتایج کلی براساس سرعت DNS، Ping، Packet Loss و دسترسی واقعی سرویس‌ها مرتب می‌شوند."
             };
             UpdateListCoverageText();
+            UpdateServiceShowcase(tag);
             RefreshList();
         }
+    }
+
+    private static readonly string[] ShowcasePalette =
+    {
+        "#3B82F6", "#8B5CF6", "#06B6D4", "#22C55E", "#F59E0B",
+        "#EC4899", "#6366F1", "#F43F5E", "#14B8A6", "#A855F7"
+    };
+
+    private void UpdateServiceShowcase(string tag)
+    {
+        if (tag != "ai" && tag != "game")
+        {
+            ServiceShowcaseCard.Visibility = Visibility.Collapsed;
+            _showcaseItems.Clear();
+            return;
+        }
+
+        IEnumerable<string> names;
+        if (tag == "game")
+        {
+            ServiceShowcaseTitle.Text = "پلتفرم‌های بازی پوشش‌داده‌شده";
+            ServiceShowcaseIcon.Glyph = "\uE7FC";
+            ServiceShowcaseIconBadge.Background = new SolidColorBrush(ParseColor("#1822C55E"));
+            ServiceShowcaseIcon.Foreground = new SolidColorBrush(ParseColor("#34D399"));
+            names = _targets
+                .Where(t => t.Category.Equals("game", StringComparison.OrdinalIgnoreCase))
+                .GroupBy(t => string.IsNullOrWhiteSpace(t.Group) ? t.Name : t.Group, StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.FirstOrDefault(t => t.IsPrimary)?.Name ?? g.First().Name);
+        }
+        else
+        {
+            ServiceShowcaseTitle.Text = "سرویس‌های هوش مصنوعی پوشش‌داده‌شده";
+            ServiceShowcaseIcon.Glyph = "\uE99A";
+            ServiceShowcaseIconBadge.Background = new SolidColorBrush(ParseColor("#18A855F7"));
+            ServiceShowcaseIcon.Foreground = new SolidColorBrush(ParseColor("#C084FC"));
+            names = _targets
+                .Where(t => t.Category.Equals("ai", StringComparison.OrdinalIgnoreCase))
+                .Select(t => t.Name);
+        }
+
+        _showcaseItems.Clear();
+        foreach (var name in names)
+            _showcaseItems.Add(new ServiceShowcaseItem { Name = name, Initials = InitialsFor(name), Badge = BadgeBrushFor(name) });
+
+        ServiceShowcaseCard.Visibility = _showcaseItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private static string InitialsFor(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2) return $"{char.ToUpperInvariant(parts[0][0])}{char.ToUpperInvariant(parts[1][0])}";
+        if (parts.Length == 1) return parts[0].Length >= 2 ? parts[0][..2].ToUpperInvariant() : parts[0][..1].ToUpperInvariant();
+        return "?";
+    }
+
+    private static SolidColorBrush BadgeBrushFor(string name)
+    {
+        var hash = 0;
+        foreach (var c in name) hash = unchecked(hash * 31 + c);
+        var hex = ShowcasePalette[(hash & 0x7FFFFFFF) % ShowcasePalette.Length];
+        return new SolidColorBrush(ParseColor(hex));
     }
 
     private void RefreshList()
@@ -499,7 +587,7 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             if (!silent) ShowInfo("تغییر DNS ناموفق بود", ex.Message, InfoBarSeverity.Error);
-            else _tray.Notify("DNSYar — خطا", ex.Message, Forms.ToolTipIcon.Error);
+            else _tray.Notify("DNSYar — خطا", ex.Message, TrayNotifyIcon.Error);
             return false;
         }
         finally { if (!silent) SetBusy(false); }
@@ -701,6 +789,34 @@ public sealed partial class MainWindow : Window
     }
 
     private async void ManualUpdate_Click(object sender, RoutedEventArgs e) => await TryUpdateCatalogAsync(silent: false);
+
+    private async void CheckForUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateStatusText.Text = "در حال بررسی…";
+        UpdateDownloadLink.Visibility = Visibility.Collapsed;
+        try
+        {
+            var current = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? new Version(0, 0, 0, 0);
+            var result = await _appUpdateChecker.CheckAsync(current);
+            if (result.UpdateAvailable)
+            {
+                UpdateStatusText.Text = $"نسخه جدید {result.LatestVersion} موجود است.";
+                var releaseUrl = string.IsNullOrWhiteSpace(result.ReleaseUrl)
+                    ? "https://github.com/sahandse/DNSYar/releases/latest"
+                    : result.ReleaseUrl;
+                UpdateDownloadLink.NavigateUri = new Uri(releaseUrl);
+                UpdateDownloadLink.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                UpdateStatusText.Text = "شما آخرین نسخه DNSYar را داری.";
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateStatusText.Text = $"بررسی بروزرسانی ناموفق بود: {ex.Message}";
+        }
+    }
 
     private async Task TryUpdateCatalogAsync(bool silent)
     {
@@ -951,7 +1067,7 @@ public sealed partial class MainWindow : Window
     {
         if (!_settings.TrayEnabled || !_tray.IsInitialized) return;
         var active = _providers.FirstOrDefault(x => x.IsActive)?.Name ?? "خودکار / ناشناس";
-        _tray.Update(active, _settings.SmartAutoDnsEnabled, _providers);
+        _tray.Update(active, _settings.SmartAutoDnsEnabled, _providers.Select(p => new TrayProviderInfo(p.Id, p.Name, p.Score, p.IsActive, p.PingMs)));
     }
 
     private void ShowFromTray()
@@ -1105,7 +1221,7 @@ public sealed partial class MainWindow : Window
             }
             _smartAutoFailureStreak = 0;
             UpdateSmartAutoUi($"Failover انجام شد: {previous} ← {best.Name} • امتیاز {best.Score}/100");
-            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  امتیاز {best.Score}/100", Forms.ToolTipIcon.Info);
+            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  امتیاز {best.Score}/100", TrayNotifyIcon.Info);
             if (!silent) ShowInfo("Smart Auto DNS", $"بهترین گزینه انتخاب و فعال شد: {best.Name} ({best.Score}/100)", InfoBarSeverity.Success);
         }
         catch (Exception ex)
@@ -1256,19 +1372,16 @@ public sealed partial class MainWindow : Window
     {
         var preset = themeName switch
         {
-            "Aurora" => new ThemePreset("Aurora", true, "#0A1020", "#16143B", "#07312D", "#A80B1020", "#784CFF", "#00C9A7", "#1C78FF", "#FF4FCB"),
-            "CyberNeon" => new ThemePreset("Cyber Neon", true, "#05060A", "#16051F", "#001C24", "#B805060A", "#FF00D4", "#6B00FF", "#00F5FF", "#7CFF00"),
-            "OceanDepth" => new ThemePreset("Ocean Depth", true, "#041421", "#062B43", "#021C32", "#B5041421", "#006DFF", "#00C7D9", "#00A0B8", "#5E7CFF"),
-            "Graphite3D" => new ThemePreset("Graphite 3D", true, "#111318", "#242932", "#0B0C10", "#B8111318", "#697586", "#2F3744", "#D4D9E2", "#8B5CFF"),
-            _ => new ThemePreset("Glass 3D", false, "#EEF4FF", "#F5EEFF", "#E8FBFA", "#B8FFFFFF", "#7A5CFF", "#4DDBFF", "#49D7B0", "#FF7FB8")
+            "Aurora" => new ThemePreset("Aurora", true, "#0B0F1A", "#10141F", "#DC10141F"),
+            "CyberNeon" => new ThemePreset("Neon", true, "#0A0A10", "#12111A", "#DC12111A"),
+            "OceanDepth" => new ThemePreset("Ocean", true, "#071722", "#0B2130", "#DC0B2130"),
+            "Graphite3D" => new ThemePreset("Graphite", true, "#111318", "#191C22", "#DC191C22"),
+            _ => new ThemePreset("روشن", false, "#F7F8FA", "#EEF1F5", "#F2FFFFFF")
         };
 
         RootGrid.RequestedTheme = preset.Dark ? ElementTheme.Dark : ElementTheme.Light;
-        ThemeBackdrop.Background = Gradient(preset.Background1, preset.Background2, preset.Background3);
+        ThemeBackdrop.Background = Gradient(preset.Background1, preset.Background2);
         NavView.Background = new SolidColorBrush(ParseColor(preset.Navigation));
-        OrbOne.Background = Gradient(preset.Orb1, preset.Orb2);
-        OrbTwo.Background = Gradient(preset.Orb3, preset.Orb1);
-        OrbThree.Background = Gradient(preset.Orb4, preset.Orb2);
         ThemeNameText.Text = preset.DisplayName;
     }
 
@@ -1308,17 +1421,22 @@ public sealed partial class MainWindow : Window
         bool Dark,
         string Background1,
         string Background2,
-        string Background3,
-        string Navigation,
-        string Orb1,
-        string Orb2,
-        string Orb3,
-        string Orb4);
+        string Navigation);
 
     private async void FontCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (FontCombo.SelectedItem is not ComboBoxItem item || item.Content is not string family) return;
-        RootGrid.FontFamily = new FontFamily(family);
+        if (FontCombo.SelectedItem is not ComboBoxItem item) return;
+        var family = item.Tag as string ?? item.Content as string;
+        if (string.IsNullOrWhiteSpace(family)) return;
+        try
+        {
+            RootFontHost.FontFamily = new FontFamily(family);
+        }
+        catch (Exception ex)
+        {
+            ShowInfo("فونت اعمال نشد", ex.Message, InfoBarSeverity.Warning);
+            return;
+        }
         if (_initializing) return;
         _settings.FontFamily = family;
         await _store.SaveSettingsAsync(_settings);
@@ -1328,7 +1446,8 @@ public sealed partial class MainWindow : Window
     {
         foreach (var item in FontCombo.Items.OfType<ComboBoxItem>())
         {
-            if (string.Equals(item.Content?.ToString(), family, StringComparison.OrdinalIgnoreCase))
+            var value = item.Tag as string ?? item.Content as string;
+            if (string.Equals(value, family, StringComparison.OrdinalIgnoreCase))
             {
                 FontCombo.SelectedItem = item;
                 return;
