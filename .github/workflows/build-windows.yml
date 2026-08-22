@@ -47,35 +47,28 @@ jobs:
             -p:PublishSingleFile=false `
             -o .\Release\win-x64
 
-      - name: Diagnose publish output (temporary - investigating XamlParseException)
+      - name: Copy resources.pri into publish output (WindowsAppSDK unpackaged-publish bug)
         shell: pwsh
         run: |
+          # dotnet publish for an unpackaged (WindowsPackageType=None) Windows App SDK app
+          # generates resources.pri in the intermediate bin\ output but does not copy it to
+          # the publish folder - a known upstream bug (microsoft/WindowsAppSDK#3451). Without
+          # it, Application.LoadComponent's ms-appx:/// resolution fails for the app's own
+          # compiled MainWindow.xaml on every launch (XamlParseException, no useful message).
           $out = "Release\win-x64"
-          Write-Host "== resources.pri =="
-          Get-ChildItem -Path $out -Filter "resources.pri" -Recurse | ForEach-Object { Write-Host "$($_.FullName)  ($($_.Length) bytes)" }
-          if (-not (Get-ChildItem -Path $out -Filter "resources.pri" -Recurse)) { Write-Host "MISSING: no resources.pri found anywhere under $out" }
-
-          Write-Host "== WindowsAppRuntime / WinUI native files =="
-          Get-ChildItem -Path $out -Filter "*WindowsAppRuntime*" -Recurse | ForEach-Object { Write-Host $_.FullName }
-          Get-ChildItem -Path $out -Filter "Microsoft.ui.xaml.dll" -Recurse | ForEach-Object { Write-Host $_.FullName }
-          Get-ChildItem -Path $out -Filter "Microsoft.WindowsAppRuntime.Bootstrap.dll" -Recurse | ForEach-Object { Write-Host $_.FullName }
-
-          Write-Host "== DNSYar.exe / DNSYar.dll presence =="
-          Get-ChildItem -Path $out -Filter "DNSYar.*" | ForEach-Object { Write-Host "$($_.Name)  ($($_.Length) bytes)" }
-
-          Write-Host "== app.manifest embedded check (via DNSYar.exe) =="
-          $exe = Join-Path $out "DNSYar.exe"
-          if (Test-Path $exe) {
-            $sigtool = Get-Command mt.exe -ErrorAction SilentlyContinue
-            Write-Host "DNSYar.exe exists, size: $((Get-Item $exe).Length) bytes"
+          $pri = Get-ChildItem -Path "bin","obj" -Filter "resources.pri" -Recurse -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $pri) {
+            Write-Host "##[error]resources.pri not found anywhere under bin\ or obj\ - cannot fix the publish output."
+            exit 1
           }
-
-          Write-Host "== Full top-level output listing =="
-          Get-ChildItem -Path $out | ForEach-Object { Write-Host "$($_.Name)$(if($_.PSIsContainer){'/'})" }
-
-          Write-Host "== Total file count and size =="
-          $all = Get-ChildItem -Path $out -Recurse -File
-          Write-Host "Files: $($all.Count), Total size: $([math]::Round(($all | Measure-Object Length -Sum).Sum / 1MB, 1)) MB"
+          Write-Host "Found resources.pri: $($pri.FullName) ($($pri.Length) bytes)"
+          Copy-Item -Path $pri.FullName -Destination (Join-Path $out "resources.pri") -Force
+          if (-not (Test-Path (Join-Path $out "resources.pri"))) {
+            Write-Host "##[error]Copy failed: resources.pri still missing from $out"
+            exit 1
+          }
+          Write-Host "Copied resources.pri into $out"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
