@@ -47,6 +47,36 @@ jobs:
             -p:PublishSingleFile=false `
             -o .\Release\win-x64
 
+      - name: Diagnose publish output (temporary - investigating XamlParseException)
+        shell: pwsh
+        run: |
+          $out = "Release\win-x64"
+          Write-Host "== resources.pri =="
+          Get-ChildItem -Path $out -Filter "resources.pri" -Recurse | ForEach-Object { Write-Host "$($_.FullName)  ($($_.Length) bytes)" }
+          if (-not (Get-ChildItem -Path $out -Filter "resources.pri" -Recurse)) { Write-Host "MISSING: no resources.pri found anywhere under $out" }
+
+          Write-Host "== WindowsAppRuntime / WinUI native files =="
+          Get-ChildItem -Path $out -Filter "*WindowsAppRuntime*" -Recurse | ForEach-Object { Write-Host $_.FullName }
+          Get-ChildItem -Path $out -Filter "Microsoft.ui.xaml.dll" -Recurse | ForEach-Object { Write-Host $_.FullName }
+          Get-ChildItem -Path $out -Filter "Microsoft.WindowsAppRuntime.Bootstrap.dll" -Recurse | ForEach-Object { Write-Host $_.FullName }
+
+          Write-Host "== DNSYar.exe / DNSYar.dll presence =="
+          Get-ChildItem -Path $out -Filter "DNSYar.*" | ForEach-Object { Write-Host "$($_.Name)  ($($_.Length) bytes)" }
+
+          Write-Host "== app.manifest embedded check (via DNSYar.exe) =="
+          $exe = Join-Path $out "DNSYar.exe"
+          if (Test-Path $exe) {
+            $sigtool = Get-Command mt.exe -ErrorAction SilentlyContinue
+            Write-Host "DNSYar.exe exists, size: $((Get-Item $exe).Length) bytes"
+          }
+
+          Write-Host "== Full top-level output listing =="
+          Get-ChildItem -Path $out | ForEach-Object { Write-Host "$($_.Name)$(if($_.PSIsContainer){'/'})" }
+
+          Write-Host "== Total file count and size =="
+          $all = Get-ChildItem -Path $out -Recurse -File
+          Write-Host "Files: $($all.Count), Total size: $([math]::Round(($all | Measure-Object Length -Sum).Sum / 1MB, 1)) MB"
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
