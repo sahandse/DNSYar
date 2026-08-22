@@ -47,28 +47,41 @@ jobs:
             -p:PublishSingleFile=false `
             -o .\Release\win-x64
 
-      - name: Copy resources.pri into publish output (WindowsAppSDK unpackaged-publish bug)
+      - name: Diagnose resources.pri (search whole workspace, do not fail build)
         shell: pwsh
         run: |
-          # dotnet publish for an unpackaged (WindowsPackageType=None) Windows App SDK app
-          # generates resources.pri in the intermediate bin\ output but does not copy it to
-          # the publish folder - a known upstream bug (microsoft/WindowsAppSDK#3451). Without
-          # it, Application.LoadComponent's ms-appx:/// resolution fails for the app's own
-          # compiled MainWindow.xaml on every launch (XamlParseException, no useful message).
-          $out = "Release\win-x64"
-          $pri = Get-ChildItem -Path "bin","obj" -Filter "resources.pri" -Recurse -ErrorAction SilentlyContinue |
-            Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          if (-not $pri) {
-            Write-Host "##[error]resources.pri not found anywhere under bin\ or obj\ - cannot fix the publish output."
-            exit 1
+          Write-Host "=== Searching entire workspace for *.pri files ==="
+          $all = Get-ChildItem -Path "." -Filter "*.pri" -Recurse -ErrorAction SilentlyContinue
+          if ($all) {
+            $all | ForEach-Object { Write-Host "$($_.FullName)  ($($_.Length) bytes, modified $($_.LastWriteTime))" }
+          } else {
+            Write-Host "No *.pri files found anywhere under the workspace."
           }
-          Write-Host "Found resources.pri: $($pri.FullName) ($($pri.Length) bytes)"
-          Copy-Item -Path $pri.FullName -Destination (Join-Path $out "resources.pri") -Force
-          if (-not (Test-Path (Join-Path $out "resources.pri"))) {
-            Write-Host "##[error]Copy failed: resources.pri still missing from $out"
-            exit 1
+
+          Write-Host ""
+          Write-Host "=== obj\ directory tree (depth-limited) for DNSYar ==="
+          if (Test-Path "obj") {
+            Get-ChildItem -Path "obj" -Recurse -Directory -ErrorAction SilentlyContinue |
+              Select-Object -First 60 -ExpandProperty FullName | ForEach-Object { Write-Host $_ }
+          } else {
+            Write-Host "No obj\ directory found at repo root."
           }
-          Write-Host "Copied resources.pri into $out"
+
+          Write-Host ""
+          Write-Host "=== Re-running publish with detailed verbosity, grepping for Pri-related targets ==="
+          dotnet publish DNSYar.csproj -c Release -r win-x64 --self-contained true `
+            -p:Platform=x64 -p:WindowsAppSDKSelfContained=true -p:PublishSingleFile=false `
+            -o .\Release\win-x64-diag -v:detailed *> publish-detailed.log
+          Select-String -Path publish-detailed.log -Pattern "Pri|MakePri|ProjectPriFile" -SimpleMatch:$false |
+            Select-Object -First 100 | ForEach-Object { Write-Host $_.Line }
+
+      - name: Upload diagnostic log artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pri-diagnostics
+          path: publish-detailed.log
+          if-no-files-found: warn
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
