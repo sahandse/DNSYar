@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using DNSYar.Services;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI;
@@ -16,9 +17,9 @@ public sealed class DnsProvider : INotifyPropertyChanged
     private int _reachableServices;
     private int _totalServices;
     private bool _isActive;
-    private string _status = "آماده تست";
-    private string _recommendation = "هنوز تست نشده";
-    private string _serviceDetailsText = "برای دیدن وضعیت سرویس‌ها تست را اجرا کن.";
+    private string _status = "";
+    private string _recommendation = "";
+    private string _serviceDetailsText = "";
 
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string Name { get; set; } = "DNS";
@@ -59,11 +60,11 @@ public sealed class DnsProvider : INotifyPropertyChanged
     [JsonIgnore] public string LossText => $"{PacketLoss:0}%";
     [JsonIgnore] public string ScoreText => Score == 0 ? "—" : $"{Score}/100";
     [JsonIgnore] public string ServiceText => TotalServices == 0 ? "—" : $"{ReachableServices}/{TotalServices}";
-    [JsonIgnore] public string ActiveText => IsActive ? "فعال" : "";
+    [JsonIgnore] public string ActiveText => IsActive ? UiText.Current.Active : "";
     [JsonIgnore] public string Addresses => string.IsNullOrWhiteSpace(Secondary) ? Primary : $"{Primary}  •  {Secondary}";
-    [JsonIgnore] public string SourceText => IsCustom ? "دستی • ذخیره محلی" : Source;
+    [JsonIgnore] public string SourceText => IsCustom ? UiText.Current.CustomSource : Source;
     [JsonIgnore] public Brush ScoreBrush => BrushForScore(Score);
-    [JsonIgnore] public Brush StatusBrush => Status.StartsWith("خطا", StringComparison.OrdinalIgnoreCase) ? Solid("#EF4444") : BrushForScore(Score);
+    [JsonIgnore] public Brush StatusBrush => IsErrorStatus ? Solid("#EF4444") : BrushForScore(Score);
     [JsonIgnore] public Brush ActiveBrush => IsActive ? Solid("#22C55E") : Solid("#94A3B8");
     [JsonIgnore] public Brush ServiceBrush
     {
@@ -89,4 +90,23 @@ public sealed class DnsProvider : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    public void NotifyLanguage()
+    {
+        if (PingMs is null && Score == 0)
+        {
+            Status = UiText.Current.ReadyToTest;
+            Recommendation = UiText.Current.G("NotTested");
+            ServiceDetailsText = UiText.Current.G("ServiceDetailsHint");
+        }
+        if (!IsCustom && (Source is "داخلی" or "Built-in" or "Internal" or ""))
+            Source = UiText.Current.G("InternalSource");
+        OnChanged(nameof(ActiveText));
+        OnChanged(nameof(SourceText));
+        OnChanged(nameof(StatusBrush));
+    }
+
+    private bool IsErrorStatus =>
+        Status.StartsWith("خطا", StringComparison.OrdinalIgnoreCase) ||
+        Status.StartsWith("Error", StringComparison.OrdinalIgnoreCase);
 }

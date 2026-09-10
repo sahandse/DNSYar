@@ -7,6 +7,11 @@ Open DNSYar.csproj in Visual Studio on Windows and restore NuGet packages.
 This environment is Linux and does not have the Windows SDK/WinUI toolchain, so the project was structurally validated here but not compiled into an EXE.
 
 
+v0.7.3 notes:
+- Bundled Vazirmatn Variable (Persian) and Inter Variable (English) in Assets/Fonts.
+- Inter family name in the TTF is "Inter Variable".
+- Language is stored in settings (`fa` / `en`) and drives FlowDirection plus Auto font.
+
 v0.7.2 notes:
 - System Tray lives in DNSYar.Tray (WinForms). The WinUI project no longer sets UseWindowsForms.
 - Root font is applied via RootFontHost (ContentControl); Grid.FontFamily does not exist in WinUI 3.

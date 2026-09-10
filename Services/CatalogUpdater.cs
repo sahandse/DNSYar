@@ -14,13 +14,13 @@ public sealed class CatalogUpdater
     {
         var normalizedUrl = NormalizeGithubUrl(url);
         if (!Uri.TryCreate(normalizedUrl, UriKind.Absolute, out var uri) || uri.Scheme != "https")
-            throw new InvalidOperationException("آدرس بروزرسانی باید یک URL معتبر HTTPS باشد.");
+            throw new InvalidOperationException(UiText.Current.G("CatalogHttpsRequired"));
 
         using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("DNSYar/0.7.2");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("DNSYar/0.7.3");
         var content = await client.GetStringAsync(uri, cancellationToken);
         if (string.IsNullOrWhiteSpace(content))
-            throw new InvalidOperationException("فهرست DNS دریافتی خالی است.");
+            throw new InvalidOperationException(UiText.Current.G("CatalogEmpty"));
 
         var trimmed = content.TrimStart();
         List<DnsProvider> list;
@@ -44,7 +44,7 @@ public sealed class CatalogUpdater
             .ToList();
 
         if (list.Count == 0)
-            throw new InvalidOperationException("هیچ DNS معتبر IPv4 در منبع GitHub پیدا نشد.");
+            throw new InvalidOperationException(UiText.Current.G("CatalogNoIpv4"));
 
         foreach (var provider in list)
         {
@@ -88,7 +88,7 @@ public sealed class CatalogUpdater
         }
         catch (JsonException) { }
 
-        throw new InvalidOperationException("ساختار JSON منبع DNS پشتیبانی نمی‌شود.");
+        throw new InvalidOperationException(UiText.Current.G("CatalogJsonUnsupported"));
     }
 
     private static List<DnsProvider> ParseDnsText(string text)
@@ -125,7 +125,7 @@ public sealed class CatalogUpdater
                 Primary = values[0],
                 Secondary = values.Length > 1 ? values[1] : null,
                 Categories = new[] { "all" },
-                Description = $"افزوده‌شده خودکار از GitHub • دسته منبع: {category}",
+                Description = UiText.Current.F("CatalogGithubDesc", category),
                 Source = $"GitHub • {category}"
             });
         }

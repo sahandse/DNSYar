@@ -1,3 +1,8 @@
+## 0.7.3
+- New minimal bilingual UI (Persian RTL + English LTR) with a language switch in the sidebar and Settings.
+- Bundled **Vazirmatn** (Persian) and **Inter** (English) variable fonts; Auto font follows the active language.
+- Replaced the glass-orb look with Paper / Ink / Signal themes, tighter type, and a flat node graphic.
+
 ## 0.7.2
 - Fixed WinUI build: moved System Tray (WinForms NotifyIcon) into `DNSYar.Tray` so `UseWinUI` and `UseWindowsForms` are no longer mixed in one project (MC6000).
 - Fixed `FontFamily` on `Grid` (WinUI 3 has no such property) by hosting the font on a `ContentControl`.

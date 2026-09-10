@@ -47,6 +47,8 @@ public sealed partial class MainWindow : Window
     private readonly SemaphoreSlim _networkChangeLock = new(1, 1);
     private List<DnsSnapshot> _dnsSnapshots = new();
 
+    public UiText T => UiText.Current;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -106,6 +108,8 @@ public sealed partial class MainWindow : Window
 
         if (HeroVisual is not null)
             HeroVisual.Visibility = veryCompact ? Visibility.Collapsed : Visibility.Visible;
+        if (HeroActions is not null)
+            HeroActions.Orientation = compact ? Orientation.Vertical : Orientation.Horizontal;
     }
 
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -121,16 +125,19 @@ public sealed partial class MainWindow : Window
         try
         {
             _settings = await _store.LoadSettingsAsync();
+            MigrateAppearanceSettings();
             if (string.IsNullOrWhiteSpace(_settings.UpdateUrl))
                 _settings.UpdateUrl = AppSettings.DefaultGithubUpdateUrl;
+            T.SetLanguage(_settings.Language);
+            ApplyDirection();
+            ApplyFont(_settings.FontFamily);
+            SelectFontInCombo(_settings.FontFamily);
+            ApplyTheme(_settings.ThemeName);
             _dnsSnapshots = await _store.LoadDnsSnapshotsAsync();
             _providers = await _store.LoadProvidersAsync();
             _targets = await _store.LoadTargetsAsync();
             UpdateCoverageCounters();
 
-            RootFontHost.FontFamily = new FontFamily(_settings.FontFamily);
-            SelectFontInCombo(_settings.FontFamily);
-            ApplyTheme(_settings.ThemeName);
             AutoUpdateToggle.IsOn = _settings.AutoUpdate;
             RestoreOnExitToggle.IsOn = _settings.RestoreDnsOnExit;
             CrashRecoveryToggle.IsOn = _settings.RecoverDnsAfterUnexpectedExit;
@@ -160,7 +167,7 @@ public sealed partial class MainWindow : Window
             RefreshList();
             InitializeTray();
             ConfigureAutoDnsTimer();
-            UpdateSmartAutoUi("آماده");
+            ApplyLanguageChrome();
 
             if (_settings.AutoUpdate && !string.IsNullOrWhiteSpace(_settings.UpdateUrl))
             {
@@ -171,7 +178,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            ShowInfo("خطا در راه‌اندازی", ex.Message, InfoBarSeverity.Error);
+            ShowInfo(T.G("StartupError"), ex.Message, InfoBarSeverity.Error);
         }
     }
 
@@ -188,17 +195,17 @@ public sealed partial class MainWindow : Window
             _filter = tag;
             ListTitle.Text = tag switch
             {
-                "ai" => "DNS برای هوش مصنوعی",
-                "dev" => "DNS برای برنامه‌نویسی",
-                "game" => "DNS برای بازی",
-                _ => "همه DNSها"
+                "ai" => T.ListTitleAi,
+                "dev" => T.ListTitleDev,
+                "game" => T.ListTitleGame,
+                _ => T.ListTitleAll
             };
             ListSubtitle.Text = tag switch
             {
-                "ai" => "دسترسی واقعی ChatGPT، Gemini، Claude و APIهای اصلی را با هر DNS مقایسه کن.",
-                "dev" => "GitHub، Docker، npm، PyPI، NuGet و ابزارهای توسعه با هر DNS تست می‌شوند.",
-                "game" => "پلتفرم‌های اصلی بازی با چند Endpoint تست می‌شوند؛ سبز یعنی مسیر اصلی سرویس قابل دسترسی است.",
-                _ => "نتایج کلی براساس سرعت DNS، Ping، Packet Loss و دسترسی واقعی سرویس‌ها مرتب می‌شوند."
+                "ai" => T.ListSubAi,
+                "dev" => T.ListSubDev,
+                "game" => T.ListSubGame,
+                _ => T.ListSubAll
             };
             UpdateListCoverageText();
             RefreshList();
@@ -243,9 +250,9 @@ public sealed partial class MainWindow : Window
         var gamePlatforms = gameTargets.Select(x => string.IsNullOrWhiteSpace(x.Group) ? x.Name : x.Group!)
             .Distinct(StringComparer.OrdinalIgnoreCase).Count();
 
-        AiTargetCountText.Text = $"{ai} مسیر برای سرویس‌های AI";
-        DevTargetCountText.Text = $"{dev} مسیر برای ابزارهای توسعه";
-        GameTargetCountText.Text = $"{gamePlatforms} پلتفرم • {gameTargets.Count} Endpoint";
+        AiTargetCountText.Text = T.F("CoverageAi", ai);
+        DevTargetCountText.Text = T.F("CoverageDev", dev);
+        GameTargetCountText.Text = T.F("CoverageGame", gamePlatforms, gameTargets.Count);
         ProviderCountText.Text = _providers.Count.ToString();
         UpdateListCoverageText();
     }
@@ -258,27 +265,27 @@ public sealed partial class MainWindow : Window
             var gameTargets = _targets.Where(x => x.Category.Equals("game", StringComparison.OrdinalIgnoreCase)).ToList();
             var groups = gameTargets.Select(x => string.IsNullOrWhiteSpace(x.Group) ? x.Name : x.Group!)
                 .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            ListCoverageText.Text = $"{groups.Count} پلتفرم • {gameTargets.Count} Endpoint • " + string.Join(" • ", groups);
+            ListCoverageText.Text = T.F("CoverageGameList", groups.Count, gameTargets.Count, string.Join(" • ", groups));
         }
         else if (_filter == "ai")
-            ListCoverageText.Text = $"{_targets.Count(x => x.Category.Equals("ai", StringComparison.OrdinalIgnoreCase))} Endpoint هوش مصنوعی";
+            ListCoverageText.Text = T.F("CoverageAiShort", _targets.Count(x => x.Category.Equals("ai", StringComparison.OrdinalIgnoreCase)));
         else if (_filter == "dev")
-            ListCoverageText.Text = $"{_targets.Count(x => x.Category.Equals("dev", StringComparison.OrdinalIgnoreCase))} Endpoint برنامه‌نویسی";
+            ListCoverageText.Text = T.F("CoverageDevShort", _targets.Count(x => x.Category.Equals("dev", StringComparison.OrdinalIgnoreCase)));
         else
-            ListCoverageText.Text = $"{_providers.Count} DNS • {_targets.Count} Endpoint در همه دسته‌ها";
+            ListCoverageText.Text = T.F("CoverageAll", _providers.Count, _targets.Count);
     }
 
     private void RefreshCurrentDns()
     {
         if (_selectedAdapter is null)
         {
-            CurrentDnsText.Text = "کارت شبکه پیدا نشد";
+            CurrentDnsText.Text = T.G("NoAdapter");
             AdapterSummaryText.Text = "—";
             return;
         }
         AdapterSummaryText.Text = _selectedAdapter.Name;
         var dns = _network.GetCurrentDns(_selectedAdapter.Id);
-        CurrentDnsText.Text = dns.Count == 0 ? "خودکار / نامشخص" : string.Join(" • ", dns);
+        CurrentDnsText.Text = dns.Count == 0 ? T.G("DhcpMode") : string.Join(" • ", dns);
         RefreshActiveFlags();
         UpdateTrayState();
     }
@@ -302,13 +309,13 @@ public sealed partial class MainWindow : Window
     {
         if (!TryNormalizeSiteAddress(SiteAddressBox.Text, out var uri, out var error))
         {
-            ShowInfo("آدرس سایت معتبر نیست", error, InfoBarSeverity.Warning);
+            ShowInfo(T.G("InvalidUrl"), error, InfoBarSeverity.Warning);
             return;
         }
 
         if (_providers.Count == 0)
         {
-            ShowInfo("DNS پیدا نشد", "فهرست DNS خالی است.", InfoBarSeverity.Warning);
+            ShowInfo(T.G("DnsMissing"), T.G("DnsListEmpty"), InfoBarSeverity.Warning);
             return;
         }
 
@@ -336,7 +343,7 @@ public sealed partial class MainWindow : Window
                 }
                 catch (OperationCanceledException)
                 {
-                    result.Complete(new SiteProbeResult(false, false, 0, 0, 0, Array.Empty<System.Net.IPAddress>(), null, "تست لغو شد یا زمان آن به پایان رسید"));
+                    result.Complete(new SiteProbeResult(false, false, 0, 0, 0, Array.Empty<System.Net.IPAddress>(), null, T.G("Cancelled")));
                 }
                 catch (Exception ex)
                 {
@@ -362,10 +369,10 @@ public sealed partial class MainWindow : Window
 
             var green = ordered.Count(x => x.IsSuccess);
             ShowInfo(
-                green > 0 ? "تست سایت کامل شد" : "DNS موفق پیدا نشد",
+                green > 0 ? T.G("SiteDone") : T.G("SiteNone"),
                 green > 0
-                    ? $"{green} DNS توانستند {uri.Host} را باز کنند. موارد سبز در بالای لیست قرار گرفتند."
-                    : $"هیچ‌کدام از DNSهای فعلی نتوانستند {uri.Host} را با موفقیت باز کنند.",
+                    ? T.F("SiteDoneMsg", green, uri.Host)
+                    : T.F("SiteNoneMsg", uri.Host),
                 green > 0 ? InfoBarSeverity.Success : InfoBarSeverity.Warning);
         }
         finally
@@ -403,7 +410,7 @@ public sealed partial class MainWindow : Window
         var value = input?.Trim();
         if (string.IsNullOrWhiteSpace(value))
         {
-            error = "یک دامنه مثل google.com وارد کن.";
+            error = T.G("EmptyUrlHint");
             return false;
         }
 
@@ -412,14 +419,14 @@ public sealed partial class MainWindow : Window
 
         if (!Uri.TryCreate(value, UriKind.Absolute, out uri) || string.IsNullOrWhiteSpace(uri.Host))
         {
-            error = "نمونه صحیح: google.com یا https://google.com";
+            error = T.G("UrlHint");
             uri = null;
             return false;
         }
 
         if (uri.Scheme is not "http" and not "https")
         {
-            error = "فقط آدرس‌های HTTP و HTTPS قابل تست هستند.";
+            error = T.G("HttpOnly");
             uri = null;
             return false;
         }
@@ -427,8 +434,8 @@ public sealed partial class MainWindow : Window
         return true;
     }
 
-    private async void TestAll_Click(object sender, RoutedEventArgs e) => await TestProvidersAsync(_providers, _targets, "در حال تست همه DNSها…");
-    private async void TestVisible_Click(object sender, RoutedEventArgs e) => await TestProvidersAsync(_visibleProviders.ToList(), TargetsForFilter(_filter), "در حال تست DNSهای این بخش…");
+    private async void TestAll_Click(object sender, RoutedEventArgs e) => await TestProvidersAsync(_providers, _targets, T.G("TestingAll"));
+    private async void TestVisible_Click(object sender, RoutedEventArgs e) => await TestProvidersAsync(_visibleProviders.ToList(), TargetsForFilter(_filter), T.G("TestingSection"));
 
     private async Task TestProvidersAsync(IReadOnlyList<DnsProvider> providers, IReadOnlyList<ServiceTarget> targets, string message)
     {
@@ -442,7 +449,7 @@ public sealed partial class MainWindow : Window
             {
                 await semaphore.WaitAsync(cts.Token);
                 try { await _benchmark.TestProviderAsync(p, targets, cts.Token); }
-                catch (Exception ex) { p.Status = $"خطا: {ex.Message}"; }
+                catch (Exception ex) { p.Status = T.F("ErrorPrefix", ex.Message); }
                 finally { semaphore.Release(); }
             });
             await Task.WhenAll(tasks);
@@ -457,7 +464,7 @@ public sealed partial class MainWindow : Window
     private async void TestProvider_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as FrameworkElement)?.DataContext is not DnsProvider provider) return;
-        SetBusy(true, $"در حال تست {provider.Name}…");
+        SetBusy(true, T.F("TestingNamed", provider.Name));
         try
         {
             await _benchmark.TestProviderAsync(provider, TargetsForFilter(_filter), CancellationToken.None);
@@ -478,7 +485,7 @@ public sealed partial class MainWindow : Window
     {
         if (_best is null)
         {
-            ShowInfo("هنوز بهترین DNS مشخص نشده", "ابتدا تست همه DNSها را اجرا کن.", InfoBarSeverity.Warning);
+            ShowInfo(T.G("BestUnknown"), T.G("BestUnknownHint"), InfoBarSeverity.Warning);
             return;
         }
         await ConnectAsync(_best);
@@ -489,10 +496,10 @@ public sealed partial class MainWindow : Window
         var adapter = _selectedAdapter;
         if (adapter is null)
         {
-            if (!silent) ShowInfo("کارت شبکه انتخاب نشده", "یک کارت شبکه فعال انتخاب کن.", InfoBarSeverity.Warning);
+            if (!silent) ShowInfo(T.G("NoAdapterSelected"), T.G("PickAdapter"), InfoBarSeverity.Warning);
             return false;
         }
-        if (!silent) SetBusy(true, $"در حال اعمال {provider.Name}…");
+        if (!silent) SetBusy(true, T.F("ApplyingNamed", provider.Name));
         await _networkChangeLock.WaitAsync();
         try
         {
@@ -500,15 +507,15 @@ public sealed partial class MainWindow : Window
             await _network.ApplyAsync(adapter, provider);
             RefreshCurrentDns();
             if (!silent)
-                ShowInfo("DNS تغییر کرد", $"{provider.Name} روی {adapter.Name} فعال شد.", InfoBarSeverity.Success);
+                ShowInfo(T.G("DnsChanged"), T.F("DnsChangedMsg", provider.Name, adapter.Name), InfoBarSeverity.Success);
             else if (!string.IsNullOrWhiteSpace(origin))
-                _tray.Notify("DNSYar", $"{provider.Name} فعال شد • {origin}");
+                _tray.Notify("DNSYar", T.F("DnsChangedMsg", provider.Name, origin ?? adapter.Name));
             return true;
         }
         catch (Exception ex)
         {
-            if (!silent) ShowInfo("تغییر DNS ناموفق بود", ex.Message, InfoBarSeverity.Error);
-            else _tray.Notify("DNSYar — خطا", ex.Message, TrayNotifyIcon.Error);
+            if (!silent) ShowInfo(T.G("DnsFailed"), ex.Message, InfoBarSeverity.Error);
+            else _tray.Notify("DNSYar", ex.Message, TrayNotifyIcon.Error);
             return false;
         }
         finally
@@ -524,11 +531,11 @@ public sealed partial class MainWindow : Window
         var snapshot = GetSnapshot(_selectedAdapter.Id);
         if (snapshot is null)
         {
-            ShowInfo("تنظیم قبلی ثبت نشده", "DNSYar برای این کارت شبکه هنوز DNS را تغییر نداده است؛ بنابراین چیزی را حدس نمی‌زند یا به اجبار DHCP نمی‌کند.", InfoBarSeverity.Warning);
+            ShowInfo(T.G("NoSnapshot"), T.G("NoSnapshotHint"), InfoBarSeverity.Warning);
             return;
         }
 
-        SetBusy(true, "در حال بازگردانی تنظیم DNS قبلی…");
+        SetBusy(true, T.G("Restoring"));
         await _networkChangeLock.WaitAsync();
         try
         {
@@ -536,10 +543,10 @@ public sealed partial class MainWindow : Window
             RemoveSnapshot(snapshot.AdapterId);
             await PersistSnapshotsAsync();
             RefreshCurrentDns();
-            var mode = snapshot.IsDhcp ? "حالت خودکار (DHCP)" : string.Join(" • ", snapshot.Servers);
-            ShowInfo("DNS قبلی بازگردانده شد", $"تنظیم قبلی کارت شبکه بازیابی شد: {mode}", InfoBarSeverity.Success);
+            var mode = snapshot.IsDhcp ? T.G("DhcpMode") : string.Join(" • ", snapshot.Servers);
+            ShowInfo(T.G("RestoreOk"), T.F("RestoreOkMsg", mode), InfoBarSeverity.Success);
         }
-        catch (Exception ex) { ShowInfo("بازگردانی ناموفق بود", ex.Message, InfoBarSeverity.Error); }
+        catch (Exception ex) { ShowInfo(T.G("RestoreFail"), ex.Message, InfoBarSeverity.Error); }
         finally
         {
             _networkChangeLock.Release();
@@ -551,10 +558,10 @@ public sealed partial class MainWindow : Window
     {
         if (SnapshotCount == 0)
         {
-            ShowInfo("چیزی برای بازگردانی نیست", "هیچ تنظیم DNS قبلی توسط DNSYar ذخیره نشده است.", InfoBarSeverity.Informational);
+            ShowInfo(T.G("NothingToRestore"), T.G("NothingToRestoreHint"), InfoBarSeverity.Informational);
             return;
         }
-        SetBusy(true, "در حال بازگردانی همه تنظیمات DNS…");
+        SetBusy(true, T.G("RestoringAll"));
         try { await RestoreAllSnapshotsAsync(silent: false); RefreshCurrentDns(); }
         finally { SetBusy(false); }
     }
@@ -637,9 +644,9 @@ public sealed partial class MainWindow : Window
             if (!silent)
             {
                 if (failures.Count == 0)
-                    ShowInfo("بازگردانی کامل شد", $"تنظیم قبلی {restored} کارت شبکه با موفقیت بازیابی شد.", InfoBarSeverity.Success);
+                    ShowInfo(T.G("RestoreAllOk"), T.F("RestoreAllOkMsg", restored), InfoBarSeverity.Success);
                 else
-                    ShowInfo("بازگردانی ناقص بود", $"{restored} مورد بازیابی شد. {failures.Count} مورد خطا داشت: {string.Join(" | ", failures)}", InfoBarSeverity.Warning);
+                    ShowInfo(T.G("RestorePartial"), T.F("RestorePartialMsg", restored, failures.Count, string.Join(" | ", failures)), InfoBarSeverity.Warning);
             }
         }
         finally
@@ -658,7 +665,7 @@ public sealed partial class MainWindow : Window
         {
             args.Cancel = true;
             AppWindow.Hide();
-            _tray.Notify("DNSYar همچنان فعال است", "برنامه در System Tray اجرا می‌شود. برای خروج کامل از منوی Tray استفاده کن.");
+            _tray.Notify(T.G("TrayHiddenTitle"), T.G("TrayHiddenMsg"));
             return;
         }
 
@@ -706,9 +713,9 @@ public sealed partial class MainWindow : Window
         if (_best is null) return;
         BestNameText.Text = _best.Name;
         BestRecommendationText.Text = _best.Recommendation;
-        BestPingText.Text = $"Ping: {_best.PingText}";
-        BestDnsText.Text = $"DNS: {_best.DnsText}";
-        BestServicesText.Text = $"Services: {_best.ServiceText}";
+        BestPingText.Text = T.F("BestPingFmt", _best.PingText);
+        BestDnsText.Text = T.F("BestDnsFmt", _best.DnsText);
+        BestServicesText.Text = T.F("BestServicesFmt", _best.ServiceText);
         BestScoreText.Text = _best.ScoreText;
     }
 
@@ -732,17 +739,17 @@ public sealed partial class MainWindow : Window
     {
         if (_catalogUpdateInProgress)
         {
-            if (!silent) ShowInfo("بروزرسانی در حال اجراست", "تا پایان دریافت فعلی نیازی به اجرای دوباره نیست.", InfoBarSeverity.Informational);
+            if (!silent) ShowInfo(T.G("CatalogBusy"), T.G("CatalogBusyHint"), InfoBarSeverity.Informational);
             return;
         }
         if (string.IsNullOrWhiteSpace(_settings.UpdateUrl))
         {
-            if (!silent) ShowInfo("آدرس بروزرسانی خالی است", "در تنظیمات، لینک فایل GitHub را وارد کن یا روی «منبع پیش‌فرض» بزن.", InfoBarSeverity.Warning);
+            if (!silent) ShowInfo(T.G("CatalogEmptyUrl"), T.G("CatalogEmptyUrlHint"), InfoBarSeverity.Warning);
             return;
         }
 
         _catalogUpdateInProgress = true;
-        if (!silent) SetBusy(true, "در حال دریافت و ادغام DNSهای GitHub…");
+        if (!silent) SetBusy(true, T.G("CatalogBusyOverlay"));
         try
         {
             var result = await _updater.DownloadAsync(_settings.UpdateUrl);
@@ -788,11 +795,11 @@ public sealed partial class MainWindow : Window
             RefreshList();
 
             if (!silent)
-                ShowInfo("بروزرسانی GitHub انجام شد", $"{added} DNS جدید اضافه شد، {updated} مورد بروزرسانی شد. فرمت منبع: {result.Format}. DNSهای دستی حفظ شدند.", InfoBarSeverity.Success);
+                ShowInfo(T.G("CatalogOk"), T.F("CatalogOkMsg", added, updated, result.Format), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
-            if (!silent) ShowInfo("بروزرسانی ناموفق بود", ex.Message, InfoBarSeverity.Error);
+            if (!silent) ShowInfo(T.G("CatalogFail"), ex.Message, InfoBarSeverity.Error);
         }
         finally
         {
@@ -804,15 +811,15 @@ public sealed partial class MainWindow : Window
 
     private async void AddCustomDns_Click(object sender, RoutedEventArgs e)
     {
-        var nameBox = new TextBox { Header = "نام DNS", PlaceholderText = "مثال: DNS شرکت من" };
-        var primaryBox = new TextBox { Header = "Primary IPv4", PlaceholderText = "مثال: 1.2.3.4", FlowDirection = FlowDirection.LeftToRight };
-        var secondaryBox = new TextBox { Header = "Secondary IPv4 (اختیاری)", PlaceholderText = "مثال: 1.2.3.5", FlowDirection = FlowDirection.LeftToRight };
-        var dohBox = new TextBox { Header = "DoH URL (اختیاری)", PlaceholderText = "https://.../dns-query", FlowDirection = FlowDirection.LeftToRight };
-        var categoryBox = new ComboBox { Header = "نمایش در بخش", HorizontalAlignment = HorizontalAlignment.Stretch };
-        categoryBox.Items.Add(new ComboBoxItem { Content = "همه بخش‌ها", Tag = "all" });
-        categoryBox.Items.Add(new ComboBoxItem { Content = "هوش مصنوعی", Tag = "ai" });
-        categoryBox.Items.Add(new ComboBoxItem { Content = "برنامه‌نویسی", Tag = "dev" });
-        categoryBox.Items.Add(new ComboBoxItem { Content = "بازی", Tag = "game" });
+        var nameBox = new TextBox { Header = T.G("CustomName"), PlaceholderText = T.G("CustomNamePh") };
+        var primaryBox = new TextBox { Header = T.G("CustomPrimary"), PlaceholderText = "1.2.3.4", FlowDirection = FlowDirection.LeftToRight };
+        var secondaryBox = new TextBox { Header = T.G("CustomSecondary"), PlaceholderText = "1.2.3.5", FlowDirection = FlowDirection.LeftToRight };
+        var dohBox = new TextBox { Header = T.G("CustomDoh"), PlaceholderText = "https://.../dns-query", FlowDirection = FlowDirection.LeftToRight };
+        var categoryBox = new ComboBox { Header = T.G("CustomCategory"), HorizontalAlignment = HorizontalAlignment.Stretch };
+        categoryBox.Items.Add(new ComboBoxItem { Content = T.CategoryAll, Tag = "all" });
+        categoryBox.Items.Add(new ComboBoxItem { Content = T.ProfileAi, Tag = "ai" });
+        categoryBox.Items.Add(new ComboBoxItem { Content = T.ProfileDev, Tag = "dev" });
+        categoryBox.Items.Add(new ComboBoxItem { Content = T.ProfileGame, Tag = "game" });
         categoryBox.SelectedIndex = 0;
 
         var panel = new StackPanel { Spacing = 10, MinWidth = 410 };
@@ -823,7 +830,7 @@ public sealed partial class MainWindow : Window
         panel.Children.Add(categoryBox);
         panel.Children.Add(new TextBlock
         {
-            Text = "DNS دستی فقط روی همین سیستم ذخیره می‌شود و بروزرسانی GitHub آن را حذف نمی‌کند.",
+            Text = T.G("CustomNote"),
             Opacity = 0.65,
             TextWrapping = TextWrapping.Wrap
         });
@@ -831,10 +838,10 @@ public sealed partial class MainWindow : Window
         var dialog = new ContentDialog
         {
             XamlRoot = RootGrid.XamlRoot,
-            Title = "افزودن DNS دستی",
+            Title = T.G("CustomTitle"),
             Content = panel,
-            PrimaryButtonText = "افزودن",
-            CloseButtonText = "انصراف",
+            PrimaryButtonText = T.G("CustomAdd"),
+            CloseButtonText = T.G("CustomCancel"),
             DefaultButton = ContentDialogButton.Primary
         };
 
@@ -849,27 +856,27 @@ public sealed partial class MainWindow : Window
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            ShowInfo("نام DNS خالی است", "برای DNS یک نام وارد کن.", InfoBarSeverity.Warning);
+            ShowInfo(T.G("NameEmpty"), T.G("NameEmptyHint"), InfoBarSeverity.Warning);
             return;
         }
         if (!IsValidIpv4(primary))
         {
-            ShowInfo("Primary نامعتبر است", "یک IPv4 معتبر مثل 10.202.10.202 وارد کن.", InfoBarSeverity.Warning);
+            ShowInfo(T.G("PrimaryInvalid"), T.G("PrimaryInvalidHint"), InfoBarSeverity.Warning);
             return;
         }
         if (!string.IsNullOrWhiteSpace(secondary) && !IsValidIpv4(secondary))
         {
-            ShowInfo("Secondary نامعتبر است", "Secondary را خالی بگذار یا یک IPv4 معتبر وارد کن.", InfoBarSeverity.Warning);
+            ShowInfo(T.G("SecondaryInvalid"), T.G("PrimaryInvalidHint"), InfoBarSeverity.Warning);
             return;
         }
         if (!string.IsNullOrWhiteSpace(doh) && (!Uri.TryCreate(doh, UriKind.Absolute, out var dohUri) || dohUri.Scheme != "https"))
         {
-            ShowInfo("DoH نامعتبر است", "آدرس DoH باید یک URL کامل HTTPS باشد.", InfoBarSeverity.Warning);
+            ShowInfo(T.G("DohInvalid"), T.G("DohInvalidHint"), InfoBarSeverity.Warning);
             return;
         }
         if (_providers.Any(x => x.Primary.Equals(primary, StringComparison.OrdinalIgnoreCase)))
         {
-            ShowInfo("DNS تکراری است", "این Primary از قبل در فهرست وجود دارد.", InfoBarSeverity.Warning);
+            ShowInfo(T.G("DuplicateDns"), T.G("DuplicateDnsHint"), InfoBarSeverity.Warning);
             return;
         }
 
@@ -881,16 +888,16 @@ public sealed partial class MainWindow : Window
             Secondary = string.IsNullOrWhiteSpace(secondary) ? null : secondary,
             DoH = string.IsNullOrWhiteSpace(doh) ? null : doh,
             Categories = category == "all" ? new[] { "all" } : new[] { category, "all" },
-            Description = "DNS دستی افزوده‌شده توسط کاربر",
+            Description = T.G("CustomDescription"),
             IsCustom = true,
-            Source = "دستی"
+            Source = T.G("CustomSource")
         };
 
         _providers.Add(provider);
         await _store.SaveCustomProvidersAsync(_providers.Where(x => x.IsCustom));
         UpdateCoverageCounters();
         RefreshList();
-        ShowInfo("DNS اضافه شد", $"{name} ذخیره شد و در تست‌ها و بخش تست سایت استفاده می‌شود.", InfoBarSeverity.Success);
+        ShowInfo(T.G("CustomSaved"), T.F("CustomSavedMsg", name), InfoBarSeverity.Success);
     }
 
     private static bool IsValidIpv4(string value) =>
@@ -902,7 +909,7 @@ public sealed partial class MainWindow : Window
         _settings.UpdateUrl = AppSettings.DefaultGithubUpdateUrl;
         UpdateUrlBox.Text = _settings.UpdateUrl;
         await _store.SaveSettingsAsync(_settings);
-        ShowInfo("منبع GitHub بازگردانی شد", "منبع پیش‌فرض DNSYar فعال شد.", InfoBarSeverity.Success);
+        ShowInfo(T.G("SourceReset"), T.G("SourceResetHint"), InfoBarSeverity.Success);
     }
 
     private async void UpdateIntervalCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -926,8 +933,8 @@ public sealed partial class MainWindow : Window
     private void UpdateLastCatalogText()
     {
         LastUpdateText.Text = _settings.LastCatalogUpdate is null
-            ? "آخرین بروزرسانی: هنوز انجام نشده"
-            : $"آخرین بروزرسانی: {_settings.LastCatalogUpdate.Value.LocalDateTime:yyyy/MM/dd HH:mm}";
+            ? T.G("LastUpdateNever")
+            : T.F("LastUpdate", _settings.LastCatalogUpdate.Value.LocalDateTime);
     }
 
     private async void CatalogTimer_Tick(object? sender, object e)
@@ -976,6 +983,7 @@ public sealed partial class MainWindow : Window
     {
         if (!_settings.TrayEnabled) return;
         _tray.Initialize(_settings.SmartAutoDnsEnabled);
+        ApplyTrayMenu();
         _tray.SetVisible(true);
         UpdateTrayState();
     }
@@ -983,7 +991,7 @@ public sealed partial class MainWindow : Window
     private void UpdateTrayState()
     {
         if (!_settings.TrayEnabled || !_tray.IsInitialized) return;
-        var active = _providers.FirstOrDefault(x => x.IsActive)?.Name ?? "خودکار / ناشناس";
+        var active = _providers.FirstOrDefault(x => x.IsActive)?.Name ?? T.G("DhcpMode");
         _tray.Update(active, _settings.SmartAutoDnsEnabled, _providers.Select(p =>
             new TrayProviderInfo(p.Id, p.Name, p.Score, p.IsActive, p.PingMs)));
     }
@@ -998,12 +1006,12 @@ public sealed partial class MainWindow : Window
     {
         if (SnapshotCount == 0)
         {
-            _tray.Notify("DNSYar", "تنظیم قبلی ذخیره‌شده‌ای برای بازگردانی وجود ندارد.");
+            _tray.Notify("DNSYar", T.G("NoRestoreTray"));
             return;
         }
         await RestoreAllSnapshotsAsync(silent: true);
         RefreshCurrentDns();
-        _tray.Notify("DNSYar", "تنظیم DNS قبلی با موفقیت بازگردانده شد.");
+        _tray.Notify("DNSYar", T.G("RestoreTrayOk"));
     }
 
     private void ExitFromTray()
@@ -1056,7 +1064,7 @@ public sealed partial class MainWindow : Window
         if (!_settings.SmartAutoDnsEnabled && !forceSelection) return;
 
         _smartAutoInProgress = true;
-        if (!silent) SetBusy(true, "Smart Auto DNS در حال بررسی وضعیت و انتخاب بهترین DNS…");
+        if (!silent) SetBusy(true, T.G("SmartBusy"));
         try
         {
             var profile = _settings.SmartAutoDnsProfile;
@@ -1064,7 +1072,7 @@ public sealed partial class MainWindow : Window
             var candidates = AutoProvidersForProfile(profile);
             if (candidates.Count == 0 || targets.Count == 0)
             {
-                UpdateSmartAutoUi("برای این پروفایل DNS یا Endpoint کافی وجود ندارد.");
+                UpdateSmartAutoUi(T.G("SmartNoTarget"));
                 return;
             }
 
@@ -1081,14 +1089,14 @@ public sealed partial class MainWindow : Window
                 if (healthy)
                 {
                     _smartAutoFailureStreak = 0;
-                    UpdateSmartAutoUi($"{active.Name} سالم است • امتیاز {active.Score}/100 • تغییر لازم نیست");
+                    UpdateSmartAutoUi(T.F("SmartHealthy", active.Name, active.Score));
                     return;
                 }
 
                 _smartAutoFailureStreak++;
                 if (_smartAutoFailureStreak < Math.Max(1, _settings.SmartAutoDnsFailuresBeforeSwitch))
                 {
-                    UpdateSmartAutoUi($"افت کیفیت {active.Name} ثبت شد • {_smartAutoFailureStreak}/{_settings.SmartAutoDnsFailuresBeforeSwitch} تا Failover");
+                    UpdateSmartAutoUi(T.F("SmartDrop", active.Name, _smartAutoFailureStreak, _settings.SmartAutoDnsFailuresBeforeSwitch));
                     return;
                 }
             }
@@ -1099,7 +1107,7 @@ public sealed partial class MainWindow : Window
             {
                 await semaphore.WaitAsync(cts.Token);
                 try { await _benchmark.TestProviderAsync(provider, targets, cts.Token); }
-                catch { provider.Status = "خطا در تست خودکار"; }
+                catch { provider.Status = T.G("AutoTestError"); }
                 finally { semaphore.Release(); }
             }).ToArray();
             await Task.WhenAll(tasks);
@@ -1118,34 +1126,34 @@ public sealed partial class MainWindow : Window
 
             if (best is null)
             {
-                UpdateSmartAutoUi("هیچ DNS سالمی به حداقل امتیاز تعیین‌شده نرسید؛ DNS فعلی تغییر نکرد.");
-                if (!silent) ShowInfo("Smart Auto DNS", "DNS مناسبی برای Failover پیدا نشد و تنظیم فعلی دست‌نخورده ماند.", InfoBarSeverity.Warning);
+                UpdateSmartAutoUi(T.G("SmartNone"));
+                if (!silent) ShowInfo("Smart Auto DNS", T.G("SmartNoneHint"), InfoBarSeverity.Warning);
                 return;
             }
 
             if (active is not null && best.Primary.Equals(active.Primary, StringComparison.OrdinalIgnoreCase))
             {
                 _smartAutoFailureStreak = 0;
-                UpdateSmartAutoUi($"بهترین گزینه همچنان {best.Name} است • {best.Score}/100");
+                UpdateSmartAutoUi(T.F("SmartSame", best.Name, best.Score));
                 return;
             }
 
-            var previous = active?.Name ?? "DNS فعلی";
+            var previous = active?.Name ?? T.G("CurrentDns");
             var applied = await ConnectAsync(best, silent: true, origin: "Smart Auto DNS");
             if (!applied)
             {
-                UpdateSmartAutoUi($"{best.Name} انتخاب شد اما اعمال DNS ناموفق بود.");
+                UpdateSmartAutoUi(T.F("SmartFailApply", best.Name));
                 return;
             }
             _smartAutoFailureStreak = 0;
-            UpdateSmartAutoUi($"Failover انجام شد: {previous} ← {best.Name} • امتیاز {best.Score}/100");
-            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  امتیاز {best.Score}/100", TrayNotifyIcon.Info);
-            if (!silent) ShowInfo("Smart Auto DNS", $"بهترین گزینه انتخاب و فعال شد: {best.Name} ({best.Score}/100)", InfoBarSeverity.Success);
+            UpdateSmartAutoUi(T.F("SmartSwitched", previous, best.Name, best.Score));
+            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  {best.Score}/100", TrayNotifyIcon.Info);
+            if (!silent) ShowInfo("Smart Auto DNS", T.F("SmartSwitchedHint", best.Name, best.Score), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
-            UpdateSmartAutoUi($"خطا: {ex.Message}");
-            if (!silent) ShowInfo("Smart Auto DNS ناموفق بود", ex.Message, InfoBarSeverity.Error);
+            UpdateSmartAutoUi(T.F("SmartError", ex.Message));
+            if (!silent) ShowInfo(T.G("SmartFailTitle"), ex.Message, InfoBarSeverity.Error);
         }
         finally
         {
@@ -1158,17 +1166,17 @@ public sealed partial class MainWindow : Window
     {
         if (SmartAutoStatusText is null) return;
         var profile = ProfileDisplayName(_settings.SmartAutoDnsProfile);
-        SmartAutoStatusText.Text = $"{(_settings.SmartAutoDnsEnabled ? "فعال" : "خاموش")} • {profile} • {status}";
+        SmartAutoStatusText.Text = T.F("SmartStatus", _settings.SmartAutoDnsEnabled ? T.On : T.Off, profile, status);
         if (HomeSmartAutoText is not null)
-            HomeSmartAutoText.Text = _settings.SmartAutoDnsEnabled ? $"فعال • {profile}" : "خاموش";
+            HomeSmartAutoText.Text = _settings.SmartAutoDnsEnabled ? T.F("HomeSmartOn", profile) : T.Off;
     }
 
-    private static string ProfileDisplayName(string profile) => profile switch
+    private string ProfileDisplayName(string profile) => profile switch
     {
-        "ai" => "هوش مصنوعی",
-        "dev" => "برنامه‌نویسی",
-        "game" => "بازی",
-        _ => "همه‌کاره"
+        "ai" => T.ProfileAi,
+        "dev" => T.ProfileDev,
+        "game" => T.ProfileGame,
+        _ => T.ProfileAll
     };
 
     private async Task SetSmartAutoEnabledAsync(bool enabled, bool fromTray = false)
@@ -1177,9 +1185,9 @@ public sealed partial class MainWindow : Window
         if (SmartAutoToggle.IsOn != enabled) SmartAutoToggle.IsOn = enabled;
         ConfigureAutoDnsTimer();
         await _store.SaveSettingsAsync(_settings);
-        UpdateSmartAutoUi(enabled ? "پایش دوره‌ای شروع شد" : "پایش متوقف شد");
+        UpdateSmartAutoUi(enabled ? T.G("SmartStarted") : T.G("SmartStopped"));
         UpdateTrayState();
-        if (fromTray) _tray.Notify("Smart Auto DNS", enabled ? "پایش و Failover خودکار فعال شد." : "پایش خودکار غیرفعال شد.");
+        if (fromTray) _tray.Notify("Smart Auto DNS", enabled ? T.G("SmartOnMsg") : T.G("SmartOffMsg"));
     }
 
     private async void SmartAutoToggle_Toggled(object sender, RoutedEventArgs e)
@@ -1195,7 +1203,7 @@ public sealed partial class MainWindow : Window
         if (_initializing) return;
         _smartAutoFailureStreak = 0;
         await _store.SaveSettingsAsync(_settings);
-        UpdateSmartAutoUi("پروفایل تغییر کرد");
+        UpdateSmartAutoUi(T.G("ProfileChanged"));
     }
 
     private async void SmartIntervalCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1258,6 +1266,7 @@ public sealed partial class MainWindow : Window
         if (_settings.TrayEnabled)
         {
             _tray.Initialize(_settings.SmartAutoDnsEnabled);
+            ApplyTrayMenu();
             _tray.SetVisible(true);
             UpdateTrayState();
         }
@@ -1288,23 +1297,28 @@ public sealed partial class MainWindow : Window
 
     private void ApplyTheme(string themeName)
     {
-        var preset = themeName switch
+        var key = NormalizeTheme(themeName);
+        var preset = key switch
         {
-            "Aurora" => new ThemePreset("Aurora", true, "#0A1020", "#16143B", "#07312D", "#A80B1020", "#784CFF", "#00C9A7", "#1C78FF", "#FF4FCB"),
-            "CyberNeon" => new ThemePreset("Cyber Neon", true, "#05060A", "#16051F", "#001C24", "#B805060A", "#FF00D4", "#6B00FF", "#00F5FF", "#7CFF00"),
-            "OceanDepth" => new ThemePreset("Ocean Depth", true, "#041421", "#062B43", "#021C32", "#B5041421", "#006DFF", "#00C7D9", "#00A0B8", "#5E7CFF"),
-            "Graphite3D" => new ThemePreset("Graphite 3D", true, "#111318", "#242932", "#0B0C10", "#B8111318", "#697586", "#2F3744", "#D4D9E2", "#8B5CFF"),
-            _ => new ThemePreset("Glass 3D", false, "#EEF4FF", "#F5EEFF", "#E8FBFA", "#B8FFFFFF", "#7A5CFF", "#4DDBFF", "#49D7B0", "#FF7FB8")
+            "Ink" => new ThemePreset(T.ThemeInk, true, "#101214", "#171A1F", "#0B0D10", "#CC101214", "#2DD4BF"),
+            "Signal" => new ThemePreset(T.ThemeSignal, true, "#071614", "#0C2420", "#04110F", "#CC071614", "#14B8A6"),
+            _ => new ThemePreset(T.ThemePaper, false, "#F3F0E8", "#EFEBE1", "#F7F5EF", "#B8F3F0E8", "#0F766E")
         };
 
         RootGrid.RequestedTheme = preset.Dark ? ElementTheme.Dark : ElementTheme.Light;
         ThemeBackdrop.Background = Gradient(preset.Background1, preset.Background2, preset.Background3);
         NavView.Background = new SolidColorBrush(ParseColor(preset.Navigation));
-        OrbOne.Background = Gradient(preset.Orb1, preset.Orb2);
-        OrbTwo.Background = Gradient(preset.Orb3, preset.Orb1);
-        OrbThree.Background = Gradient(preset.Orb4, preset.Orb2);
+        if (AccentSlab is not null)
+            AccentSlab.Fill = new SolidColorBrush(ParseColor(preset.Accent));
         ThemeNameText.Text = preset.DisplayName;
     }
+
+    private static string NormalizeTheme(string themeName) => themeName switch
+    {
+        "Ink" or "Graphite3D" => "Ink",
+        "Signal" or "Aurora" or "CyberNeon" or "OceanDepth" => "Signal",
+        _ => "Paper"
+    };
 
     private static LinearGradientBrush Gradient(params string[] colors)
     {
@@ -1344,15 +1358,12 @@ public sealed partial class MainWindow : Window
         string Background2,
         string Background3,
         string Navigation,
-        string Orb1,
-        string Orb2,
-        string Orb3,
-        string Orb4);
+        string Accent);
 
     private async void FontCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (FontCombo.SelectedItem is not ComboBoxItem item || item.Content is not string family) return;
-        RootFontHost.FontFamily = new FontFamily(family);
+        if (FontCombo.SelectedItem is not ComboBoxItem item || item.Tag is not string family) return;
+        ApplyFont(family);
         if (_initializing) return;
         _settings.FontFamily = family;
         await _store.SaveSettingsAsync(_settings);
@@ -1362,12 +1373,127 @@ public sealed partial class MainWindow : Window
     {
         foreach (var item in FontCombo.Items.OfType<ComboBoxItem>())
         {
-            if (string.Equals(item.Content?.ToString(), family, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(item.Tag?.ToString(), family, StringComparison.OrdinalIgnoreCase))
             {
                 FontCombo.SelectedItem = item;
                 return;
             }
         }
         FontCombo.SelectedIndex = 0;
+    }
+
+    private void ApplyFont(string family)
+    {
+        RootFontHost.FontFamily = ResolveFont(family);
+    }
+
+    private FontFamily ResolveFont(string family)
+    {
+        var key = string.IsNullOrWhiteSpace(family) ? "Auto" : family;
+        if (key.Equals("Auto", StringComparison.OrdinalIgnoreCase))
+            key = T.IsEnglish ? "Inter" : "Vazirmatn";
+        return key.Equals("Inter", StringComparison.OrdinalIgnoreCase)
+            ? new FontFamily(UiText.InterFamily)
+            : key.Equals("Vazirmatn", StringComparison.OrdinalIgnoreCase)
+                ? new FontFamily(UiText.VazirmatnFamily)
+                : new FontFamily("Segoe UI");
+    }
+
+    private async void LanguageFa_Click(object sender, RoutedEventArgs e) => await SetLanguageAsync("fa");
+    private async void LanguageEn_Click(object sender, RoutedEventArgs e) => await SetLanguageAsync("en");
+
+    private async Task SetLanguageAsync(string language)
+    {
+        T.SetLanguage(language);
+        _settings.Language = T.Language;
+        ApplyDirection();
+        ApplyFont(_settings.FontFamily);
+        ApplyLanguageChrome();
+        ApplyTheme(_settings.ThemeName);
+        if (!_initializing) await _store.SaveSettingsAsync(_settings);
+    }
+
+    private void ApplyDirection()
+    {
+        var direction = T.IsRtl ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+        RootFontHost.FlowDirection = direction;
+        RootGrid.FlowDirection = direction;
+        HighlightLanguageButtons();
+    }
+
+    private void HighlightLanguageButtons()
+    {
+        var lang = (Style)Application.Current.Resources["LangButtonStyle"];
+        var accent = (Style)Application.Current.Resources["AccentButtonStyle"];
+        ApplyLanguageButtonPair(LanguageFaButton, LanguageEnButton, lang, accent);
+        ApplyLanguageButtonPair(SettingsLanguageFaButton, SettingsLanguageEnButton, lang, accent);
+    }
+
+    private void ApplyLanguageButtonPair(Button? fa, Button? en, Style lang, Style accent)
+    {
+        if (fa is null || en is null) return;
+        fa.Style = T.IsEnglish ? lang : accent;
+        en.Style = T.IsEnglish ? accent : lang;
+    }
+
+    private void ApplyLanguageChrome()
+    {
+        ApplyTrayMenu();
+        foreach (var provider in _providers) provider.NotifyLanguage();
+        UpdateCoverageCounters();
+        UpdateLastCatalogText();
+        if (_best is null)
+        {
+            BestNameText.Text = T.RecommendEmpty;
+            BestRecommendationText.Text = T.RecommendHint;
+        }
+        else UpdateBestCard();
+        UpdateSmartAutoUi(T.Ready);
+        RefreshCurrentDns();
+        if (NavView.SelectedItem is NavigationViewItem item && item.Tag is string tag)
+        {
+            ListTitle.Text = tag switch
+            {
+                "ai" => T.ListTitleAi,
+                "dev" => T.ListTitleDev,
+                "game" => T.ListTitleGame,
+                _ => T.ListTitleAll
+            };
+            ListSubtitle.Text = tag switch
+            {
+                "ai" => T.ListSubAi,
+                "dev" => T.ListSubDev,
+                "game" => T.ListSubGame,
+                _ => T.ListSubAll
+            };
+            UpdateListCoverageText();
+        }
+        HighlightLanguageButtons();
+    }
+
+    private void ApplyTrayMenu()
+    {
+        if (!_tray.IsInitialized) return;
+        _tray.ApplyMenu(new TrayMenuText(
+            T.G("TrayActive"),
+            T.G("TrayOpen"),
+            T.G("TrayQuick"),
+            T.G("TraySmart"),
+            T.G("TrayTestNow"),
+            T.G("TrayRestore"),
+            T.G("TrayExit"),
+            T.G("TrayEmpty"),
+            T.IsRtl));
+        UpdateTrayState();
+    }
+
+    private void MigrateAppearanceSettings()
+    {
+        if (string.IsNullOrWhiteSpace(_settings.Language)) _settings.Language = "fa";
+        if (_settings.FontFamily is "IRANSans" or "Vazirmatn" && _settings.Language == "en")
+            _settings.FontFamily = "Auto";
+        if (string.Equals(_settings.FontFamily, "IRANSans", StringComparison.OrdinalIgnoreCase))
+            _settings.FontFamily = "Auto";
+        _settings.ThemeName = NormalizeTheme(_settings.ThemeName);
     }
 }

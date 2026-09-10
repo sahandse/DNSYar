@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml;
+using DNSYar.Services;
 
 namespace DNSYar;
 
@@ -11,6 +12,7 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+        Resources["T"] = UiText.Current;
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
