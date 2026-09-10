@@ -410,7 +410,7 @@ public sealed partial class MainWindow : Window
         var value = input?.Trim();
         if (string.IsNullOrWhiteSpace(value))
         {
-            error = T.G("EmptyUrlHint");
+            error = UiText.Current.G("EmptyUrlHint");
             return false;
         }
 
@@ -419,14 +419,14 @@ public sealed partial class MainWindow : Window
 
         if (!Uri.TryCreate(value, UriKind.Absolute, out uri) || string.IsNullOrWhiteSpace(uri.Host))
         {
-            error = T.G("UrlHint");
+            error = UiText.Current.G("UrlHint");
             uri = null;
             return false;
         }
 
         if (uri.Scheme is not "http" and not "https")
         {
-            error = T.G("HttpOnly");
+            error = UiText.Current.G("HttpOnly");
             uri = null;
             return false;
         }
