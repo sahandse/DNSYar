@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.ComponentModel;
 using DNSYar.Models;
 using DNSYar.Services;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -11,7 +12,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.Win32;
 using Windows.Foundation;
 using Windows.UI;
-using Forms = System.Windows.Forms;
 
 namespace DNSYar;
 
@@ -44,6 +44,7 @@ public sealed partial class MainWindow : Window
     private int _smartAutoFailureStreak;
     private bool _closeRequestedFromTray;
     private readonly object _snapshotLock = new();
+    private readonly SemaphoreSlim _networkChangeLock = new(1, 1);
     private List<DnsSnapshot> _dnsSnapshots = new();
 
     public MainWindow()
@@ -65,7 +66,13 @@ public sealed partial class MainWindow : Window
         _tray.RunSmartNowRequested += () => RootGrid.DispatcherQueue.TryEnqueue(async () => await RunSmartAutoCycleAsync(silent: false, forceSelection: true));
         _tray.RestoreRequested += () => RootGrid.DispatcherQueue.TryEnqueue(async () => await RestoreAllFromTrayAsync());
         _tray.ExitRequested += () => RootGrid.DispatcherQueue.TryEnqueue(ExitFromTray);
-        _tray.ProviderRequested += provider => RootGrid.DispatcherQueue.TryEnqueue(async () => await ConnectAsync(provider, silent: true, origin: "Quick Switch"));
+        _tray.ProviderRequested += info => RootGrid.DispatcherQueue.TryEnqueue(async () =>
+        {
+            var provider = _providers.FirstOrDefault(p => p.Id == info.Id)
+                ?? _providers.FirstOrDefault(p => p.Name.Equals(info.Name, StringComparison.OrdinalIgnoreCase));
+            if (provider is not null)
+                await ConnectAsync(provider, silent: true, origin: "Quick Switch");
+        });
         _tray.SmartAutoChanged += enabled => RootGrid.DispatcherQueue.TryEnqueue(async () => await SetSmartAutoEnabledAsync(enabled, fromTray: true));
     }
 
@@ -121,7 +128,7 @@ public sealed partial class MainWindow : Window
             _targets = await _store.LoadTargetsAsync();
             UpdateCoverageCounters();
 
-            RootGrid.FontFamily = new FontFamily(_settings.FontFamily);
+            RootFontHost.FontFamily = new FontFamily(_settings.FontFamily);
             SelectFontInCombo(_settings.FontFamily);
             ApplyTheme(_settings.ThemeName);
             AutoUpdateToggle.IsOn = _settings.AutoUpdate;
@@ -479,19 +486,21 @@ public sealed partial class MainWindow : Window
 
     private async Task<bool> ConnectAsync(DnsProvider provider, bool silent = false, string? origin = null)
     {
-        if (_selectedAdapter is null)
+        var adapter = _selectedAdapter;
+        if (adapter is null)
         {
             if (!silent) ShowInfo("کارت شبکه انتخاب نشده", "یک کارت شبکه فعال انتخاب کن.", InfoBarSeverity.Warning);
             return false;
         }
         if (!silent) SetBusy(true, $"در حال اعمال {provider.Name}…");
+        await _networkChangeLock.WaitAsync();
         try
         {
-            await EnsureSnapshotAsync(_selectedAdapter);
-            await _network.ApplyAsync(_selectedAdapter, provider);
+            await EnsureSnapshotAsync(adapter);
+            await _network.ApplyAsync(adapter, provider);
             RefreshCurrentDns();
             if (!silent)
-                ShowInfo("DNS تغییر کرد", $"{provider.Name} روی {_selectedAdapter.Name} فعال شد.", InfoBarSeverity.Success);
+                ShowInfo("DNS تغییر کرد", $"{provider.Name} روی {adapter.Name} فعال شد.", InfoBarSeverity.Success);
             else if (!string.IsNullOrWhiteSpace(origin))
                 _tray.Notify("DNSYar", $"{provider.Name} فعال شد • {origin}");
             return true;
@@ -499,10 +508,14 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             if (!silent) ShowInfo("تغییر DNS ناموفق بود", ex.Message, InfoBarSeverity.Error);
-            else _tray.Notify("DNSYar — خطا", ex.Message, Forms.ToolTipIcon.Error);
+            else _tray.Notify("DNSYar — خطا", ex.Message, TrayNotifyIcon.Error);
             return false;
         }
-        finally { if (!silent) SetBusy(false); }
+        finally
+        {
+            _networkChangeLock.Release();
+            if (!silent) SetBusy(false);
+        }
     }
 
     private async void Restore_Click(object sender, RoutedEventArgs e)
@@ -516,6 +529,7 @@ public sealed partial class MainWindow : Window
         }
 
         SetBusy(true, "در حال بازگردانی تنظیم DNS قبلی…");
+        await _networkChangeLock.WaitAsync();
         try
         {
             await _network.RestoreSnapshotAsync(snapshot);
@@ -526,7 +540,11 @@ public sealed partial class MainWindow : Window
             ShowInfo("DNS قبلی بازگردانده شد", $"تنظیم قبلی کارت شبکه بازیابی شد: {mode}", InfoBarSeverity.Success);
         }
         catch (Exception ex) { ShowInfo("بازگردانی ناموفق بود", ex.Message, InfoBarSeverity.Error); }
-        finally { SetBusy(false); }
+        finally
+        {
+            _networkChangeLock.Release();
+            SetBusy(false);
+        }
     }
 
     private async void RestoreAll_Click(object sender, RoutedEventArgs e)
@@ -596,29 +614,37 @@ public sealed partial class MainWindow : Window
 
     private async Task RestoreAllSnapshotsAsync(bool silent)
     {
-        var restored = 0;
-        var failures = new List<string>();
-        foreach (var snapshot in SnapshotCopy())
+        await _networkChangeLock.WaitAsync();
+        try
         {
-            try
+            var restored = 0;
+            var failures = new List<string>();
+            foreach (var snapshot in SnapshotCopy())
             {
-                await _network.RestoreSnapshotAsync(snapshot);
-                RemoveSnapshot(snapshot.AdapterId);
-                restored++;
+                try
+                {
+                    await _network.RestoreSnapshotAsync(snapshot);
+                    RemoveSnapshot(snapshot.AdapterId);
+                    restored++;
+                }
+                catch (Exception ex)
+                {
+                    failures.Add($"{snapshot.AdapterName}: {ex.Message}");
+                }
             }
-            catch (Exception ex)
+            await PersistSnapshotsAsync();
+
+            if (!silent)
             {
-                failures.Add($"{snapshot.AdapterName}: {ex.Message}");
+                if (failures.Count == 0)
+                    ShowInfo("بازگردانی کامل شد", $"تنظیم قبلی {restored} کارت شبکه با موفقیت بازیابی شد.", InfoBarSeverity.Success);
+                else
+                    ShowInfo("بازگردانی ناقص بود", $"{restored} مورد بازیابی شد. {failures.Count} مورد خطا داشت: {string.Join(" | ", failures)}", InfoBarSeverity.Warning);
             }
         }
-        await PersistSnapshotsAsync();
-
-        if (!silent)
+        finally
         {
-            if (failures.Count == 0)
-                ShowInfo("بازگردانی کامل شد", $"تنظیم قبلی {restored} کارت شبکه با موفقیت بازیابی شد.", InfoBarSeverity.Success);
-            else
-                ShowInfo("بازگردانی ناقص بود", $"{restored} مورد بازیابی شد. {failures.Count} مورد خطا داشت: {string.Join(" | ", failures)}", InfoBarSeverity.Warning);
+            _networkChangeLock.Release();
         }
     }
 
@@ -868,7 +894,8 @@ public sealed partial class MainWindow : Window
     }
 
     private static bool IsValidIpv4(string value) =>
-        IPAddress.TryParse(value, out var ip) && ip.AddressFamily == AddressFamily.InterNetwork && !ip.Equals(IPAddress.Any);
+        IPAddress.TryParse(value, out var ip) && ip.AddressFamily == AddressFamily.InterNetwork
+        && !ip.Equals(IPAddress.Any) && !ip.Equals(IPAddress.Broadcast);
 
     private async void ResetGithubSource_Click(object sender, RoutedEventArgs e)
     {
@@ -917,7 +944,13 @@ public sealed partial class MainWindow : Window
         await _store.SaveSettingsAsync(_settings);
     }
 
-    private async void UpdateUrlBox_TextChanged(object sender, TextChangedEventArgs e)
+    private void UpdateUrlBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_initializing) return;
+        _settings.UpdateUrl = UpdateUrlBox.Text.Trim();
+    }
+
+    private async void UpdateUrlBox_LostFocus(object sender, RoutedEventArgs e)
     {
         if (_initializing) return;
         _settings.UpdateUrl = UpdateUrlBox.Text.Trim();
@@ -951,7 +984,8 @@ public sealed partial class MainWindow : Window
     {
         if (!_settings.TrayEnabled || !_tray.IsInitialized) return;
         var active = _providers.FirstOrDefault(x => x.IsActive)?.Name ?? "خودکار / ناشناس";
-        _tray.Update(active, _settings.SmartAutoDnsEnabled, _providers);
+        _tray.Update(active, _settings.SmartAutoDnsEnabled, _providers.Select(p =>
+            new TrayProviderInfo(p.Id, p.Name, p.Score, p.IsActive, p.PingMs)));
     }
 
     private void ShowFromTray()
@@ -1105,7 +1139,7 @@ public sealed partial class MainWindow : Window
             }
             _smartAutoFailureStreak = 0;
             UpdateSmartAutoUi($"Failover انجام شد: {previous} ← {best.Name} • امتیاز {best.Score}/100");
-            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  امتیاز {best.Score}/100", Forms.ToolTipIcon.Info);
+            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  امتیاز {best.Score}/100", TrayNotifyIcon.Info);
             if (!silent) ShowInfo("Smart Auto DNS", $"بهترین گزینه انتخاب و فعال شد: {best.Name} ({best.Score}/100)", InfoBarSeverity.Success);
         }
         catch (Exception ex)
@@ -1318,7 +1352,7 @@ public sealed partial class MainWindow : Window
     private async void FontCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (FontCombo.SelectedItem is not ComboBoxItem item || item.Content is not string family) return;
-        RootGrid.FontFamily = new FontFamily(family);
+        RootFontHost.FontFamily = new FontFamily(family);
         if (_initializing) return;
         _settings.FontFamily = family;
         await _store.SaveSettingsAsync(_settings);

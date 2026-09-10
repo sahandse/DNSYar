@@ -13,11 +13,11 @@ public sealed class CatalogUpdater
     public async Task<CatalogUpdateResult> DownloadAsync(string url, CancellationToken cancellationToken = default)
     {
         var normalizedUrl = NormalizeGithubUrl(url);
-        if (!Uri.TryCreate(normalizedUrl, UriKind.Absolute, out var uri) || uri.Scheme is not ("https" or "http"))
-            throw new InvalidOperationException("آدرس بروزرسانی معتبر نیست.");
+        if (!Uri.TryCreate(normalizedUrl, UriKind.Absolute, out var uri) || uri.Scheme != "https")
+            throw new InvalidOperationException("آدرس بروزرسانی باید یک URL معتبر HTTPS باشد.");
 
         using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("DNSYar/0.4");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("DNSYar/0.7.2");
         var content = await client.GetStringAsync(uri, cancellationToken);
         if (string.IsNullOrWhiteSpace(content))
             throw new InvalidOperationException("فهرست DNS دریافتی خالی است.");
@@ -137,7 +137,8 @@ public sealed class CatalogUpdater
         (string.IsNullOrWhiteSpace(provider.Secondary) || IsIpv4(provider.Secondary));
 
     private static bool IsIpv4(string value) =>
-        IPAddress.TryParse(value, out var ip) && ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && !ip.Equals(IPAddress.Any);
+        IPAddress.TryParse(value, out var ip) && ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+        && !ip.Equals(IPAddress.Any) && !ip.Equals(IPAddress.Broadcast);
 
     private static string Slug(string value) => string.Concat(value.ToLowerInvariant().Select(c => char.IsLetterOrDigit(c) ? c : '-')).Trim('-');
 }

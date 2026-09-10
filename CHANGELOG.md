@@ -1,3 +1,13 @@
+## 0.7.2
+- Fixed WinUI build: moved System Tray (WinForms NotifyIcon) into `DNSYar.Tray` so `UseWinUI` and `UseWindowsForms` are no longer mixed in one project (MC6000).
+- Fixed `FontFamily` on `Grid` (WinUI 3 has no such property) by hosting the font on a `ContentControl`.
+- Fixed `ColorHelper` namespace (`Microsoft.UI`) so the app compiles against Windows App SDK.
+- Defined `AccentButtonStyle` in `App.xaml` to prevent XamlParseException on launch.
+- Prevented two DNSYar instances from fighting over DNS with a single-instance mutex.
+- Serialized DNS apply/restore so a concurrent switch cannot snapshot the wrong servers.
+- Catalog updates now require HTTPS; the update URL is persisted on focus-loss instead of every keystroke.
+- DNS responses must match the query ID and be in-bounds before A records are accepted.
+
 ## 0.7.1
 - Added one-click Windows x64 build scripts (`Build-EXE.bat`, `Build-EXE.ps1`).
 - Added INSTALL.md.

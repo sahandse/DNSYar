@@ -61,6 +61,11 @@
                 <Setter Property="FontWeight" Value="SemiBold" />
             </Style>
 
+            <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryActionButtonStyle}">
+                <Setter Property="Background" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+                <Setter Property="Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+            </Style>
+
             <Style x:Key="SecondaryActionButtonStyle" TargetType="Button">
                 <Setter Property="CornerRadius" Value="12" />
                 <Setter Property="Padding" Value="15,9" />

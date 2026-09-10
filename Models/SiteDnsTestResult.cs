@@ -1,8 +1,9 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using DNSYar.Services;
-using Windows.UI;
+using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 
 namespace DNSYar.Models;
 
@@ -13,7 +14,7 @@ public sealed class SiteDnsTestResult : INotifyPropertyChanged
     private string _httpText = "HTTP: —";
     private string _details = "هنوز تست نشده";
     private string _resolvedText = "IP: —";
-    private SolidColorBrush _statusBrush = new(Colors.Gray);
+    private SolidColorBrush _statusBrush = new(ColorHelper.FromArgb(255, 148, 163, 184));
     private SolidColorBrush _cardBrush = new(ColorHelper.FromArgb(42, 100, 116, 139));
     private bool _isTesting;
     private bool _isSuccess;

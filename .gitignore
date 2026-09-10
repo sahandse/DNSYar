@@ -1,0 +1,14 @@
+bin/
+obj/
+Release/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+*.log
+*.nupkg
+project.lock.json
+artifacts/

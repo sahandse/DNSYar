@@ -5,7 +5,11 @@
     xmlns:models="using:DNSYar.Models"
     Title="DNSYar">
 
-    <Grid x:Name="RootGrid" FlowDirection="RightToLeft" FontFamily="Vazirmatn" SizeChanged="RootGrid_SizeChanged">
+    <!-- Grid has no FontFamily in WinUI 3; ContentControl carries the font so it cascades. -->
+    <ContentControl x:Name="RootFontHost" FontFamily="Vazirmatn" FlowDirection="RightToLeft"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+    <Grid x:Name="RootGrid" FlowDirection="RightToLeft" SizeChanged="RootGrid_SizeChanged">
         <!-- Local vector/gradient backdrop: no network image dependency. -->
         <Grid x:Name="ThemeBackdrop" IsHitTestVisible="False">
             <Border x:Name="OrbOne" Width="460" Height="460" CornerRadius="230"
@@ -404,7 +408,7 @@
                                     <StackPanel Orientation="Horizontal" Spacing="9"><Border Width="38" Height="38" CornerRadius="12" Background="#1806B6D4"><FontIcon Glyph="&#xE895;" Foreground="#22D3EE" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><StackPanel><TextBlock Text="بروزرسانی DNS از GitHub" Style="{StaticResource SectionTitleStyle}"/><TextBlock Text="Merge امن با DNSهای موجود" FontSize="11" Opacity="0.55"/></StackPanel></StackPanel>
                                     <ToggleSwitch x:Name="AutoUpdateToggle" Header="DNSهای جدید را خودکار از GitHub دریافت کن" Toggled="AutoUpdateToggle_Toggled"/>
                                     <TextBlock Text="DNSهای دستی کاربر با بروزرسانی GitHub حذف یا جایگزین نمی‌شوند." Style="{StaticResource SubtleTextStyle}" FontSize="12"/>
-                                    <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="آدرس فایل GitHub — JSON یا TXT" Opacity="0.68"/><TextBox x:Name="UpdateUrlBox" PlaceholderText="https://github.com/.../blob/main/dns.json" TextChanged="UpdateUrlBox_TextChanged" FlowDirection="LeftToRight" CornerRadius="10"/></StackPanel><Button Grid.Column="1" Content="منبع پیش‌فرض" Click="ResetGithubSource_Click" VerticalAlignment="Bottom" Style="{StaticResource SecondaryActionButtonStyle}"/></Grid>
+                                    <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="آدرس فایل GitHub — JSON یا TXT" Opacity="0.68"/><TextBox x:Name="UpdateUrlBox" PlaceholderText="https://github.com/.../blob/main/dns.json" TextChanged="UpdateUrlBox_TextChanged" LostFocus="UpdateUrlBox_LostFocus" FlowDirection="LeftToRight" CornerRadius="10"/></StackPanel><Button Grid.Column="1" Content="منبع پیش‌فرض" Click="ResetGithubSource_Click" VerticalAlignment="Bottom" Style="{StaticResource SecondaryActionButtonStyle}"/></Grid>
                                     <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="فاصله بروزرسانی" Opacity="0.68"/><ComboBox x:Name="UpdateIntervalCombo" SelectionChanged="UpdateIntervalCombo_SelectionChanged" MinWidth="175"><ComboBoxItem Content="هر ۶ ساعت" Tag="6"/><ComboBoxItem Content="هر ۱۲ ساعت" Tag="12"/><ComboBoxItem Content="هر ۲۴ ساعت" Tag="24"/><ComboBoxItem Content="هر ۳ روز" Tag="72"/></ComboBox></StackPanel><StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="3"><TextBlock Text="منبع پیش‌فرض: Iran-DNS-Switcher / dns_servers.txt" FontSize="11" Opacity="0.55" TextWrapping="Wrap"/><TextBlock x:Name="LastUpdateText" Text="آخرین بروزرسانی: —" FontSize="11" Opacity="0.7"/></StackPanel></Grid>
                                     <StackPanel Orientation="Horizontal" Spacing="8"><Button Content="بررسی بروزرسانی الآن" Click="ManualUpdate_Click" Style="{StaticResource AccentButtonStyle}" Padding="16,8" CornerRadius="11"/><Button Content="+ افزودن DNS دستی" Click="AddCustomDns_Click" Style="{StaticResource SecondaryActionButtonStyle}"/></StackPanel>
                                 </StackPanel>
@@ -435,4 +439,5 @@
             </Grid>
         </NavigationView>
     </Grid>
+    </ContentControl>
 </Window>
