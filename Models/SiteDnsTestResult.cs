@@ -1,30 +1,40 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using DNSYar.Services;
-using Windows.UI;
+using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 
 namespace DNSYar.Models;
 
 public sealed class SiteDnsTestResult : INotifyPropertyChanged
 {
-    private string _statusText = "در انتظار تست";
-    private string _dnsText = "DNS: —";
-    private string _httpText = "HTTP: —";
-    private string _details = "هنوز تست نشده";
-    private string _resolvedText = "IP: —";
-    private SolidColorBrush _statusBrush = new(Colors.Gray);
+    private string _statusText = "";
+    private string _dnsText = "";
+    private string _httpText = "";
+    private string _details = "";
+    private string _resolvedText = "";
+    private SolidColorBrush _statusBrush = new(ColorHelper.FromArgb(255, 148, 163, 184));
     private SolidColorBrush _cardBrush = new(ColorHelper.FromArgb(42, 100, 116, 139));
     private bool _isTesting;
     private bool _isSuccess;
     private double? _httpMs;
     private bool _isCompleted;
 
-    public SiteDnsTestResult(DnsProvider provider) => Provider = provider;
+    public SiteDnsTestResult(DnsProvider provider)
+    {
+        Provider = provider;
+        StatusText = UiText.Current.G("SiteWaiting");
+        DnsText = UiText.Current.G("DnsPending");
+        HttpText = UiText.Current.G("HttpPending");
+        Details = UiText.Current.G("NotTested");
+        ResolvedText = UiText.Current.G("IpNone");
+    }
 
     public DnsProvider Provider { get; }
     public string ProviderName => Provider.Name;
     public string Addresses => Provider.Addresses;
+    public string ConnectLabel => UiText.Current.Connect;
     public string StatusText { get => _statusText; private set => Set(ref _statusText, value); }
     public string DnsText { get => _dnsText; private set => Set(ref _dnsText, value); }
     public string HttpText { get => _httpText; private set => Set(ref _httpText, value); }
@@ -42,11 +52,11 @@ public sealed class SiteDnsTestResult : INotifyPropertyChanged
         IsCompleted = false;
         IsTesting = true;
         IsSuccess = false;
-        StatusText = "در حال تست…";
-        DnsText = "DNS: …";
-        HttpText = "HTTP: …";
-        Details = "در حال Resolve و بررسی اتصال واقعی سایت";
-        ResolvedText = "IP: …";
+        StatusText = UiText.Current.G("SiteTesting");
+        DnsText = UiText.Current.G("DnsEllipsis");
+        HttpText = UiText.Current.G("HttpEllipsis");
+        Details = UiText.Current.G("SiteTestingDetail");
+        ResolvedText = UiText.Current.G("IpEllipsis");
         StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 100, 116, 139));
         CardBrush = new SolidColorBrush(ColorHelper.FromArgb(70, 100, 116, 139));
     }
@@ -57,31 +67,36 @@ public sealed class SiteDnsTestResult : INotifyPropertyChanged
         IsCompleted = true;
         IsSuccess = result.Reachable;
         HttpMs = result.HttpElapsedMs;
-        DnsText = result.DnsResolved ? $"DNS: {result.DnsElapsedMs:0} ms" : "DNS: بدون پاسخ";
+        DnsText = result.DnsResolved ? UiText.Current.F("DnsMsFmt", result.DnsElapsedMs) : UiText.Current.G("DnsNoReply");
         HttpText = result.Reachable
-            ? $"HTTP: {result.HttpElapsedMs:0} ms • {result.StatusCode}"
-            : result.StatusCode is > 0 ? $"HTTP: خطا • {result.StatusCode}" : "HTTP: ناموفق";
-        ResolvedText = result.Addresses.Count == 0 ? "IP: —" : $"IP: {string.Join(" • ", result.Addresses.Take(3))}";
+            ? UiText.Current.F("HttpOkFmt", result.HttpElapsedMs, result.StatusCode)
+            : result.StatusCode is > 0 ? UiText.Current.F("HttpErrFmt", result.StatusCode) : UiText.Current.G("HttpFail");
+        ResolvedText = result.Addresses.Count == 0
+            ? UiText.Current.G("IpNone")
+            : UiText.Current.F("IpFmt", string.Join(" • ", result.Addresses.Take(3)));
 
         if (result.Reachable)
         {
-            StatusText = "باز می‌شود";
-            Details = result.FinalUri is null ? "اتصال واقعی سایت با این DNS موفق بود" : $"موفق • {result.FinalUri.Host}";
+            StatusText = UiText.Current.G("SiteOpen");
+            Details = result.FinalUri is null ? UiText.Current.G("SiteOk") : UiText.Current.F("SiteOkHost", result.FinalUri.Host);
             StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74));
             CardBrush = new SolidColorBrush(ColorHelper.FromArgb(95, 22, 163, 74));
         }
         else
         {
-            StatusText = "باز نمی‌شود";
+            StatusText = UiText.Current.G("SiteClosed");
             Details = result.DnsResolved
-                ? (string.IsNullOrWhiteSpace(result.Error) ? "DNS پاسخ داد، اما اتصال سایت ناموفق بود" : result.Error)
-                : "این DNS دامنه را Resolve نکرد";
+                ? (string.IsNullOrWhiteSpace(result.Error) ? UiText.Current.G("SiteHttpFail") : result.Error)
+                : UiText.Current.G("SiteDnsFail");
             StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 220, 38, 38));
             CardBrush = new SolidColorBrush(ColorHelper.FromArgb(95, 220, 38, 38));
         }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void NotifyLanguage() =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConnectLabel)));
 
     private void Set<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {

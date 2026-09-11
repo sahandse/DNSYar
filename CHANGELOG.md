@@ -1,3 +1,25 @@
+## 0.8.0
+- Published as a GitHub Release with a downloadable Windows x64 ZIP.
+- Bilingual minimal UI, bundled Vazirmatn/Inter fonts, and the unpackaged startup XAML fix.
+
+## 0.7.4
+- Fixed startup XamlParseException on unpackaged WinUI: custom fonts load from files beside the EXE instead of `ms-appx`, and DataTemplates no longer depend on a runtime `T` resource.
+
+## 0.7.3
+- New minimal bilingual UI (Persian RTL + English LTR) with a language switch in the sidebar and Settings.
+- Bundled **Vazirmatn** (Persian) and **Inter** (English) variable fonts; Auto font follows the active language.
+- Replaced the glass-orb look with Paper / Ink / Signal themes, tighter type, and a flat node graphic.
+
+## 0.7.2
+- Fixed WinUI build: moved System Tray (WinForms NotifyIcon) into `DNSYar.Tray` so `UseWinUI` and `UseWindowsForms` are no longer mixed in one project (MC6000).
+- Fixed `FontFamily` on `Grid` (WinUI 3 has no such property) by hosting the font on a `ContentControl`.
+- Fixed `ColorHelper` namespace (`Microsoft.UI`) so the app compiles against Windows App SDK.
+- Defined `AccentButtonStyle` in `App.xaml` to prevent XamlParseException on launch.
+- Prevented two DNSYar instances from fighting over DNS with a single-instance mutex.
+- Serialized DNS apply/restore so a concurrent switch cannot snapshot the wrong servers.
+- Catalog updates now require HTTPS; the update URL is persisted on focus-loss instead of every keystroke.
+- DNS responses must match the query ID and be in-bounds before A records are accepted.
+
 ## 0.7.1
 - Added one-click Windows x64 build scripts (`Build-EXE.bat`, `Build-EXE.ps1`).
 - Added INSTALL.md.

@@ -2,7 +2,9 @@ name: Build DNSYar Windows
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
+    branches: [main]
     tags:
       - 'v*'
 
@@ -10,7 +12,7 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout
@@ -20,6 +22,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+          global-json-file: global.json
 
       - name: Restore
         run: dotnet restore DNSYar.csproj
@@ -42,3 +45,19 @@ jobs:
           name: DNSYar-win-x64
           path: Release/win-x64/**
           if-no-files-found: error
+
+      - name: Zip release package
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          Compress-Archive -Path .\Release\win-x64\* -DestinationPath .\DNSYar-${{ github.ref_name }}-win-x64.zip -Force
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: DNSYar-${{ github.ref_name }}-win-x64.zip
+          name: DNSYar ${{ github.ref_name }}
+          generate_release_notes: true
+          body: |
+            بسته ویندوز x64 (self-contained). ZIP را Extract کنید و `DNSYar.exe` را Run as administrator اجرا کنید. فقط خود EXE را جدا نکنید.

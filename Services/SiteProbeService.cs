@@ -22,7 +22,7 @@ public sealed class SiteProbeService
     {
         var dnsResult = await _dns.QueryAAsync(dnsServer, uri.Host, 2800, cancellationToken);
         if (!dnsResult.Success)
-            return new(false, false, dnsResult.ElapsedMs, 0, 0, Array.Empty<IPAddress>(), null, "پاسخی برای دامنه دریافت نشد");
+            return new(false, false, dnsResult.ElapsedMs, 0, 0, Array.Empty<IPAddress>(), null, UiText.Current.G("DnsTimeout"));
 
         var handler = new SocketsHttpHandler
         {
@@ -88,7 +88,7 @@ public sealed class SiteProbeService
         catch (Exception ex)
         {
             sw.Stop();
-            var message = ex is TaskCanceledException ? "مهلت اتصال تمام شد" : ex.Message;
+            var message = ex is TaskCanceledException ? UiText.Current.G("HttpTimeout") : ex.Message;
             return new(true, false, dnsResult.ElapsedMs, sw.Elapsed.TotalMilliseconds, 0, dnsResult.Addresses, null, message);
         }
     }

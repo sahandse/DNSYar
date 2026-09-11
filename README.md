@@ -12,12 +12,12 @@ DNSYar یک برنامه WinUI 3 برای Windows 10/11 است که DNSها را
 - Microsoft Windows App SDK 2.3.1
 - Unpackaged desktop app
 
-## قابلیت‌های نسخه 0.7.1
-- UI کاملاً بازطراحی‌شده، فارسی و RTL
-- داشبورد Hero با کارت‌های آماری مدرن
+## قابلیت‌های نسخه 0.8.0
+- UI مینیمال دوزبانه (فارسی RTL و English LTR) با سوییچ زبان
+- فونت Vazirmatn و Inter همراه برنامه
+- تم‌های Paper / Ink / Signal
+- داشبورد Hero با کارت‌های آماری فشرده و گرافیک شبکه‌ای
 - چیدمان Responsive: کارت‌های آماری/تم/نتیجه سایت Wrap می‌شوند و بخش‌های اصلی در عرض کم به حالت ستونی می‌روند
-- ۵ تم سه‌بعدی برداری بدون وابستگی به تصویر اینترنتی
-- انتخاب Vazirmatn / IRANSans / Segoe UI
 - جستجوی زنده DNS بر اساس نام، IP و منبع
 - انتخاب کارت شبکه و نمایش DNS فعال
 - تست Ping، Packet Loss و DNS Query
@@ -131,11 +131,9 @@ Smart Auto DNS به‌صورت پیش‌فرض خاموش است و کاربر �
 2. Recovery در اجرای بعدی اگر Process ناگهانی متوقف شده باشد
 
 ## تم‌ها
-- Glass 3D
-- Aurora
-- Cyber Neon
-- Ocean Depth
-- Graphite 3D
+- **Paper** — روشن و گرم
+- **Ink** — تیره ذغالی
+- **Signal** — تیره با لهجه تیل
 
 ## پیش‌نیاز Build
 1. Windows 10 19041+ یا Windows 11
