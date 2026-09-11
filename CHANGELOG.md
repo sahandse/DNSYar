@@ -1,3 +1,6 @@
+## 0.7.4
+- Fixed startup XamlParseException on unpackaged WinUI: custom fonts load from files beside the EXE instead of `ms-appx`, and DataTemplates no longer depend on a runtime `T` resource.
+
 ## 0.7.3
 - New minimal bilingual UI (Persian RTL + English LTR) with a language switch in the sidebar and Settings.
 - Bundled **Vazirmatn** (Persian) and **Inter** (English) variable fonts; Auto font follows the active language.

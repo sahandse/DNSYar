@@ -52,6 +52,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        try { ApplyFont("Auto"); } catch { }
         DnsList.ItemsSource = _visibleProviders;
         SiteTestList.ItemsSource = _siteResults;
         NavView.SelectedItem = NavView.MenuItems[0];
@@ -1384,7 +1385,17 @@ public sealed partial class MainWindow : Window
 
     private void ApplyFont(string family)
     {
-        RootFontHost.FontFamily = ResolveFont(family);
+        try
+        {
+            RootFontHost.FontFamily = ResolveFont(family);
+            var english = AppFonts.Inter;
+            if (LanguageEnButton is not null) LanguageEnButton.FontFamily = english;
+            if (SettingsLanguageEnButton is not null) SettingsLanguageEnButton.FontFamily = english;
+        }
+        catch
+        {
+            RootFontHost.FontFamily = new FontFamily("Segoe UI");
+        }
     }
 
     private FontFamily ResolveFont(string family)
@@ -1393,9 +1404,9 @@ public sealed partial class MainWindow : Window
         if (key.Equals("Auto", StringComparison.OrdinalIgnoreCase))
             key = T.IsEnglish ? "Inter" : "Vazirmatn";
         return key.Equals("Inter", StringComparison.OrdinalIgnoreCase)
-            ? new FontFamily(UiText.InterFamily)
+            ? AppFonts.Inter
             : key.Equals("Vazirmatn", StringComparison.OrdinalIgnoreCase)
-                ? new FontFamily(UiText.VazirmatnFamily)
+                ? AppFonts.Vazirmatn
                 : new FontFamily("Segoe UI");
     }
 
@@ -1439,7 +1450,9 @@ public sealed partial class MainWindow : Window
     private void ApplyLanguageChrome()
     {
         ApplyTrayMenu();
+        ApplyComboTexts();
         foreach (var provider in _providers) provider.NotifyLanguage();
+        foreach (var result in _siteResults) result.NotifyLanguage();
         UpdateCoverageCounters();
         UpdateLastCatalogText();
         if (_best is null)
@@ -1469,6 +1482,62 @@ public sealed partial class MainWindow : Window
             UpdateListCoverageText();
         }
         HighlightLanguageButtons();
+    }
+
+    private void ApplyComboTexts()
+    {
+        SetComboTexts(FontCombo, new Dictionary<string, string>
+        {
+            ["Auto"] = T.FontAuto,
+            ["Vazirmatn"] = "Vazirmatn",
+            ["Inter"] = "Inter",
+            ["Segoe UI"] = "Segoe UI"
+        });
+        SetComboTexts(SmartProfileCombo, new Dictionary<string, string>
+        {
+            ["all"] = T.ProfileAll,
+            ["ai"] = T.ProfileAi,
+            ["dev"] = T.ProfileDev,
+            ["game"] = T.ProfileGame
+        });
+        SetComboTexts(SmartIntervalCombo, new Dictionary<string, string>
+        {
+            ["5"] = T.Interval5,
+            ["10"] = T.Interval10,
+            ["15"] = T.Interval15,
+            ["30"] = T.Interval30,
+            ["60"] = T.Interval60
+        });
+        SetComboTexts(SmartMinimumScoreCombo, new Dictionary<string, string>
+        {
+            ["55"] = T.Score55,
+            ["65"] = T.Score65,
+            ["75"] = T.Score75,
+            ["85"] = T.Score85
+        });
+        SetComboTexts(SmartFailuresCombo, new Dictionary<string, string>
+        {
+            ["1"] = T.Failures1,
+            ["2"] = T.Failures2,
+            ["3"] = T.Failures3
+        });
+        SetComboTexts(UpdateIntervalCombo, new Dictionary<string, string>
+        {
+            ["6"] = T.Hours6,
+            ["12"] = T.Hours12,
+            ["24"] = T.Hours24,
+            ["72"] = T.Hours72
+        });
+    }
+
+    private static void SetComboTexts(ComboBox box, IReadOnlyDictionary<string, string> map)
+    {
+        foreach (var item in box.Items.OfType<ComboBoxItem>())
+        {
+            var tag = item.Tag?.ToString() ?? "";
+            if (map.TryGetValue(tag, out var text))
+                item.Content = text;
+        }
     }
 
     private void ApplyTrayMenu()

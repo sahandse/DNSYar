@@ -61,6 +61,12 @@ public sealed class DnsProvider : INotifyPropertyChanged
     [JsonIgnore] public string ScoreText => Score == 0 ? "—" : $"{Score}/100";
     [JsonIgnore] public string ServiceText => TotalServices == 0 ? "—" : $"{ReachableServices}/{TotalServices}";
     [JsonIgnore] public string ActiveText => IsActive ? UiText.Current.Active : "";
+    [JsonIgnore] public string ConnectLabel => UiText.Current.Connect;
+    [JsonIgnore] public string TestLabel => UiText.Current.Test;
+    [JsonIgnore] public string LabelPing => UiText.Current.LabelPing;
+    [JsonIgnore] public string LabelDns => UiText.Current.LabelDns;
+    [JsonIgnore] public string LabelLoss => UiText.Current.LabelLoss;
+    [JsonIgnore] public string LabelServices => UiText.Current.LabelServices;
     [JsonIgnore] public string Addresses => string.IsNullOrWhiteSpace(Secondary) ? Primary : $"{Primary}  •  {Secondary}";
     [JsonIgnore] public string SourceText => IsCustom ? UiText.Current.CustomSource : Source;
     [JsonIgnore] public Brush ScoreBrush => BrushForScore(Score);
@@ -104,6 +110,12 @@ public sealed class DnsProvider : INotifyPropertyChanged
         OnChanged(nameof(ActiveText));
         OnChanged(nameof(SourceText));
         OnChanged(nameof(StatusBrush));
+        OnChanged(nameof(ConnectLabel));
+        OnChanged(nameof(TestLabel));
+        OnChanged(nameof(LabelPing));
+        OnChanged(nameof(LabelDns));
+        OnChanged(nameof(LabelLoss));
+        OnChanged(nameof(LabelServices));
     }
 
     private bool IsErrorStatus =>

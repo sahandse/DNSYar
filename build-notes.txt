@@ -7,6 +7,9 @@ Open DNSYar.csproj in Visual Studio on Windows and restore NuGet packages.
 This environment is Linux and does not have the Windows SDK/WinUI toolchain, so the project was structurally validated here but not compiled into an EXE.
 
 
+v0.7.4 notes:
+- Unpackaged WinUI cannot apply ms-appx font URIs in XAML; fonts are loaded from Assets/Fonts next to the EXE.
+
 v0.7.3 notes:
 - Bundled Vazirmatn Variable (Persian) and Inter Variable (English) in Assets/Fonts.
 - Inter family name in the TTF is "Inter Variable".

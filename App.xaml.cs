@@ -26,7 +26,21 @@ public partial class App : Application
             return;
         }
 
-        _window = new MainWindow();
-        _window.Activate();
+        try
+        {
+            _window = new MainWindow();
+            _window.Activate();
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DNSYar");
+                Directory.CreateDirectory(dir);
+                File.WriteAllText(Path.Combine(dir, "launch-error.txt"), ex.ToString());
+            }
+            catch { }
+            throw;
+        }
     }
 }

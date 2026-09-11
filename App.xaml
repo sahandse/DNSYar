@@ -9,9 +9,6 @@
                 <controls:XamlControlsResources />
             </ResourceDictionary.MergedDictionaries>
 
-            <FontFamily x:Key="VazirmatnFont">ms-appx:///Assets/Fonts/Vazirmatn-Variable.ttf#Vazirmatn</FontFamily>
-            <FontFamily x:Key="InterFont">ms-appx:///Assets/Fonts/InterVariable.ttf#Inter Variable</FontFamily>
-
             <Style x:Key="CardBorderStyle" TargetType="Border">
                 <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
                 <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />

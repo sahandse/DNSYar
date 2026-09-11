@@ -34,6 +34,7 @@ public sealed class SiteDnsTestResult : INotifyPropertyChanged
     public DnsProvider Provider { get; }
     public string ProviderName => Provider.Name;
     public string Addresses => Provider.Addresses;
+    public string ConnectLabel => UiText.Current.Connect;
     public string StatusText { get => _statusText; private set => Set(ref _statusText, value); }
     public string DnsText { get => _dnsText; private set => Set(ref _dnsText, value); }
     public string HttpText { get => _httpText; private set => Set(ref _httpText, value); }
@@ -93,6 +94,9 @@ public sealed class SiteDnsTestResult : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void NotifyLanguage() =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConnectLabel)));
 
     private void Set<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {

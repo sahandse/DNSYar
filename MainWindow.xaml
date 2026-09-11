@@ -5,7 +5,7 @@
     xmlns:models="using:DNSYar.Models"
     Title="DNSYar">
 
-    <ContentControl x:Name="RootFontHost" FontFamily="{StaticResource VazirmatnFont}" FlowDirection="RightToLeft"
+    <ContentControl x:Name="RootFontHost" FlowDirection="RightToLeft"
                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
     <Grid x:Name="RootGrid" FlowDirection="RightToLeft" SizeChanged="RootGrid_SizeChanged">
@@ -41,7 +41,7 @@
                     <Border CornerRadius="10" Background="{ThemeResource SubtleFillColorSecondaryBrush}" Padding="4">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <Button x:Name="LanguageFaButton" Content="{x:Bind T.LangFa, Mode=OneWay}" Click="LanguageFa_Click" Style="{StaticResource LangButtonStyle}"/>
-                            <Button x:Name="LanguageEnButton" Content="{x:Bind T.LangEn, Mode=OneWay}" Click="LanguageEn_Click" Style="{StaticResource LangButtonStyle}" FontFamily="{StaticResource InterFont}"/>
+                            <Button x:Name="LanguageEnButton" Content="{x:Bind T.LangEn, Mode=OneWay}" Click="LanguageEn_Click" Style="{StaticResource LangButtonStyle}"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -263,7 +263,7 @@
                                                         <TextBlock Text="{x:Bind ScoreText, Mode=OneWay}" Foreground="White" FontWeight="SemiBold" FontSize="12"/>
                                                     </Border>
                                                 </Grid>
-                                                <TextBlock Text="{x:Bind Addresses}" FontFamily="Cascadia Mono, Consolas" FlowDirection="LeftToRight" FontSize="13" Opacity="0.75" />
+                                                <TextBlock Text="{x:Bind Addresses}" FontFamily="Consolas" FlowDirection="LeftToRight" FontSize="13" Opacity="0.75" />
                                                 <StackPanel Orientation="Horizontal" Spacing="12">
                                                     <TextBlock Text="{x:Bind SourceText, Mode=OneWay}" FontSize="11" Opacity="0.48" />
                                                     <TextBlock Text="{x:Bind Status, Mode=OneWay}" Foreground="{x:Bind StatusBrush, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" />
@@ -271,15 +271,15 @@
                                                 <TextBlock Text="{x:Bind Recommendation, Mode=OneWay}" TextWrapping="Wrap" Opacity="0.72" FontSize="13" />
                                                 <TextBlock Text="{x:Bind ServiceDetailsText, Mode=OneWay}" TextWrapping="Wrap" FontSize="12" Opacity="0.7" LineHeight="20" />
                                                 <StackPanel Orientation="Horizontal" Spacing="18">
-                                                    <StackPanel><TextBlock Text="{Binding LabelPing, Source={StaticResource T}}" FontSize="10" Opacity="0.45"/><TextBlock Text="{x:Bind PingText, Mode=OneWay}" FontWeight="SemiBold"/></StackPanel>
-                                                    <StackPanel><TextBlock Text="{Binding LabelDns, Source={StaticResource T}}" FontSize="10" Opacity="0.45"/><TextBlock Text="{x:Bind DnsText, Mode=OneWay}" FontWeight="SemiBold"/></StackPanel>
-                                                    <StackPanel><TextBlock Text="{Binding LabelLoss, Source={StaticResource T}}" FontSize="10" Opacity="0.45"/><TextBlock Text="{x:Bind LossText, Mode=OneWay}" FontWeight="SemiBold"/></StackPanel>
-                                                    <StackPanel><TextBlock Text="{Binding LabelServices, Source={StaticResource T}}" FontSize="10" Opacity="0.45"/><TextBlock Text="{x:Bind ServiceText, Mode=OneWay}" Foreground="{x:Bind ServiceBrush, Mode=OneWay}" FontWeight="SemiBold"/></StackPanel>
+                                                    <StackPanel><TextBlock Text="{x:Bind LabelPing, Mode=OneWay}" FontSize="10" Opacity="0.45"/><TextBlock Text="{x:Bind PingText, Mode=OneWay}" FontWeight="SemiBold"/></StackPanel>
+                                                    <StackPanel><TextBlock Text="{x:Bind LabelDns, Mode=OneWay}" FontSize="10" Opacity="0.45"/><TextBlock Text="{x:Bind DnsText, Mode=OneWay}" FontWeight="SemiBold"/></StackPanel>
+                                                    <StackPanel><TextBlock Text="{x:Bind LabelLoss, Mode=OneWay}" FontSize="10" Opacity="0.45"/><TextBlock Text="{x:Bind LossText, Mode=OneWay}" FontWeight="SemiBold"/></StackPanel>
+                                                    <StackPanel><TextBlock Text="{x:Bind LabelServices, Mode=OneWay}" FontSize="10" Opacity="0.45"/><TextBlock Text="{x:Bind ServiceText, Mode=OneWay}" Foreground="{x:Bind ServiceBrush, Mode=OneWay}" FontWeight="SemiBold"/></StackPanel>
                                                 </StackPanel>
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center" MinWidth="92">
-                                                <Button Content="{Binding Connect, Source={StaticResource T}}" Click="ConnectProvider_Click" Style="{StaticResource AccentButtonStyle}" Padding="14,7" HorizontalAlignment="Stretch" />
-                                                <Button Content="{Binding Test, Source={StaticResource T}}" Click="TestProvider_Click" Style="{StaticResource SecondaryActionButtonStyle}" HorizontalAlignment="Stretch" />
+                                                <Button Content="{x:Bind ConnectLabel, Mode=OneWay}" Click="ConnectProvider_Click" Style="{StaticResource AccentButtonStyle}" Padding="14,7" HorizontalAlignment="Stretch" />
+                                                <Button Content="{x:Bind TestLabel, Mode=OneWay}" Click="TestProvider_Click" Style="{StaticResource SecondaryActionButtonStyle}" HorizontalAlignment="Stretch" />
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -297,7 +297,7 @@
                                 <TextBlock Text="{x:Bind T.SiteHint, Mode=OneWay}" Style="{StaticResource SubtleTextStyle}" />
                                 <Grid ColumnSpacing="10" Margin="0,6,0,0">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                    <TextBox x:Name="SiteAddressBox" PlaceholderText="{x:Bind T.SitePlaceholder, Mode=OneWay}" FlowDirection="LeftToRight" HorizontalContentAlignment="Left" FontFamily="Cascadia Mono, Consolas" CornerRadius="10" />
+                                    <TextBox x:Name="SiteAddressBox" PlaceholderText="{x:Bind T.SitePlaceholder, Mode=OneWay}" FlowDirection="LeftToRight" HorizontalContentAlignment="Left" FontFamily="Consolas" CornerRadius="10" />
                                     <Button x:Name="SiteTestButton" Grid.Column="1" Content="{x:Bind T.TestAll, Mode=OneWay}" Click="TestSite_Click" Style="{StaticResource AccentButtonStyle}" />
                                 </Grid>
                             </StackPanel>
@@ -325,12 +325,12 @@
                                                         <TextBlock Text="{x:Bind ProviderName}" FontSize="17" FontWeight="SemiBold"/>
                                                         <TextBlock Text="{x:Bind StatusText, Mode=OneWay}" Foreground="{x:Bind StatusBrush, Mode=OneWay}" FontWeight="SemiBold"/>
                                                     </StackPanel>
-                                                    <TextBlock Text="{x:Bind Addresses}" FlowDirection="LeftToRight" FontFamily="Cascadia Mono, Consolas" FontSize="13" />
+                                                    <TextBlock Text="{x:Bind Addresses}" FlowDirection="LeftToRight" FontFamily="Consolas" FontSize="13" />
                                                     <StackPanel Orientation="Horizontal" Spacing="16"><TextBlock Text="{x:Bind DnsText, Mode=OneWay}" Opacity="0.7"/><TextBlock Text="{x:Bind HttpText, Mode=OneWay}" Opacity="0.7"/></StackPanel>
-                                                    <TextBlock Text="{x:Bind ResolvedText, Mode=OneWay}" FlowDirection="LeftToRight" FontFamily="Cascadia Mono, Consolas" FontSize="11" Opacity="0.55" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{x:Bind ResolvedText, Mode=OneWay}" FlowDirection="LeftToRight" FontFamily="Consolas" FontSize="11" Opacity="0.55" TextTrimming="CharacterEllipsis" />
                                                     <TextBlock Text="{x:Bind Details, Mode=OneWay}" TextWrapping="Wrap" Opacity="0.65" />
                                                 </StackPanel>
-                                                <Button Grid.Column="1" Content="{Binding Connect, Source={StaticResource T}}" Click="ConnectSiteResult_Click" Style="{StaticResource AccentButtonStyle}" Padding="14,7" VerticalAlignment="Center" />
+                                                <Button Grid.Column="1" Content="{x:Bind ConnectLabel, Mode=OneWay}" Click="ConnectSiteResult_Click" Style="{StaticResource AccentButtonStyle}" Padding="14,7" VerticalAlignment="Center" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -357,7 +357,7 @@
                                     <TextBlock Text="{x:Bind T.LanguageHint, Mode=OneWay}" Style="{StaticResource SubtleTextStyle}" FontSize="12"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <Button x:Name="SettingsLanguageFaButton" Content="{x:Bind T.LangFa, Mode=OneWay}" Click="LanguageFa_Click" Style="{StaticResource LangButtonStyle}"/>
-                                        <Button x:Name="SettingsLanguageEnButton" Content="{x:Bind T.LangEn, Mode=OneWay}" Click="LanguageEn_Click" Style="{StaticResource LangButtonStyle}" FontFamily="{StaticResource InterFont}"/>
+                                        <Button x:Name="SettingsLanguageEnButton" Content="{x:Bind T.LangEn, Mode=OneWay}" Click="LanguageEn_Click" Style="{StaticResource LangButtonStyle}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -371,7 +371,7 @@
                                         <StackPanel Spacing="5">
                                             <TextBlock Text="{x:Bind T.FontLabel, Mode=OneWay}" Opacity="0.62"/>
                                             <ComboBox x:Name="FontCombo" SelectionChanged="FontCombo_SelectionChanged" HorizontalAlignment="Stretch">
-                                                <ComboBoxItem Tag="Auto" Content="{x:Bind T.FontAuto, Mode=OneWay}"/>
+                                                <ComboBoxItem Tag="Auto" Content="Auto"/>
                                                 <ComboBoxItem Tag="Vazirmatn" Content="Vazirmatn"/>
                                                 <ComboBoxItem Tag="Inter" Content="Inter"/>
                                                 <ComboBoxItem Tag="Segoe UI" Content="Segoe UI"/>
@@ -419,37 +419,37 @@
                                         <StackPanel Spacing="5">
                                             <TextBlock Text="{x:Bind T.ProfileLabel, Mode=OneWay}" Opacity="0.62"/>
                                             <ComboBox x:Name="SmartProfileCombo" SelectionChanged="SmartProfileCombo_SelectionChanged" HorizontalAlignment="Stretch">
-                                                <ComboBoxItem Content="{x:Bind T.ProfileAll, Mode=OneWay}" Tag="all"/>
-                                                <ComboBoxItem Content="{x:Bind T.ProfileAi, Mode=OneWay}" Tag="ai"/>
-                                                <ComboBoxItem Content="{x:Bind T.ProfileDev, Mode=OneWay}" Tag="dev"/>
-                                                <ComboBoxItem Content="{x:Bind T.ProfileGame, Mode=OneWay}" Tag="game"/>
+                                                <ComboBoxItem Content="All" Tag="all"/>
+                                                <ComboBoxItem Content="AI" Tag="ai"/>
+                                                <ComboBoxItem Content="Developer" Tag="dev"/>
+                                                <ComboBoxItem Content="Gaming" Tag="game"/>
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Spacing="5">
                                             <TextBlock Text="{x:Bind T.IntervalLabel, Mode=OneWay}" Opacity="0.62"/>
                                             <ComboBox x:Name="SmartIntervalCombo" SelectionChanged="SmartIntervalCombo_SelectionChanged" HorizontalAlignment="Stretch">
-                                                <ComboBoxItem Content="{x:Bind T.Interval5, Mode=OneWay}" Tag="5"/>
-                                                <ComboBoxItem Content="{x:Bind T.Interval10, Mode=OneWay}" Tag="10"/>
-                                                <ComboBoxItem Content="{x:Bind T.Interval15, Mode=OneWay}" Tag="15"/>
-                                                <ComboBoxItem Content="{x:Bind T.Interval30, Mode=OneWay}" Tag="30"/>
-                                                <ComboBoxItem Content="{x:Bind T.Interval60, Mode=OneWay}" Tag="60"/>
+                                                <ComboBoxItem Content="5" Tag="5"/>
+                                                <ComboBoxItem Content="10" Tag="10"/>
+                                                <ComboBoxItem Content="15" Tag="15"/>
+                                                <ComboBoxItem Content="30" Tag="30"/>
+                                                <ComboBoxItem Content="60" Tag="60"/>
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Grid.Row="1" Spacing="5">
                                             <TextBlock Text="{x:Bind T.MinScoreLabel, Mode=OneWay}" Opacity="0.62"/>
                                             <ComboBox x:Name="SmartMinimumScoreCombo" SelectionChanged="SmartMinimumScoreCombo_SelectionChanged" HorizontalAlignment="Stretch">
-                                                <ComboBoxItem Content="{x:Bind T.Score55, Mode=OneWay}" Tag="55"/>
-                                                <ComboBoxItem Content="{x:Bind T.Score65, Mode=OneWay}" Tag="65"/>
-                                                <ComboBoxItem Content="{x:Bind T.Score75, Mode=OneWay}" Tag="75"/>
-                                                <ComboBoxItem Content="{x:Bind T.Score85, Mode=OneWay}" Tag="85"/>
+                                                <ComboBoxItem Content="55" Tag="55"/>
+                                                <ComboBoxItem Content="65" Tag="65"/>
+                                                <ComboBoxItem Content="75" Tag="75"/>
+                                                <ComboBoxItem Content="85" Tag="85"/>
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Grid.Row="1" Grid.Column="1" Spacing="5">
                                             <TextBlock Text="{x:Bind T.FailuresLabel, Mode=OneWay}" Opacity="0.62"/>
                                             <ComboBox x:Name="SmartFailuresCombo" SelectionChanged="SmartFailuresCombo_SelectionChanged" HorizontalAlignment="Stretch">
-                                                <ComboBoxItem Content="{x:Bind T.Failures1, Mode=OneWay}" Tag="1"/>
-                                                <ComboBoxItem Content="{x:Bind T.Failures2, Mode=OneWay}" Tag="2"/>
-                                                <ComboBoxItem Content="{x:Bind T.Failures3, Mode=OneWay}" Tag="3"/>
+                                                <ComboBoxItem Content="1" Tag="1"/>
+                                                <ComboBoxItem Content="2" Tag="2"/>
+                                                <ComboBoxItem Content="3" Tag="3"/>
                                             </ComboBox>
                                         </StackPanel>
                                     </Grid>
@@ -498,10 +498,10 @@
                                         <StackPanel Spacing="5">
                                             <TextBlock Text="{x:Bind T.UpdateIntervalLabel, Mode=OneWay}" Opacity="0.62"/>
                                             <ComboBox x:Name="UpdateIntervalCombo" SelectionChanged="UpdateIntervalCombo_SelectionChanged" MinWidth="180">
-                                                <ComboBoxItem Content="{x:Bind T.Hours6, Mode=OneWay}" Tag="6"/>
-                                                <ComboBoxItem Content="{x:Bind T.Hours12, Mode=OneWay}" Tag="12"/>
-                                                <ComboBoxItem Content="{x:Bind T.Hours24, Mode=OneWay}" Tag="24"/>
-                                                <ComboBoxItem Content="{x:Bind T.Hours72, Mode=OneWay}" Tag="72"/>
+                                                <ComboBoxItem Content="6" Tag="6"/>
+                                                <ComboBoxItem Content="12" Tag="12"/>
+                                                <ComboBoxItem Content="24" Tag="24"/>
+                                                <ComboBoxItem Content="72" Tag="72"/>
                                             </ComboBox>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="3">
