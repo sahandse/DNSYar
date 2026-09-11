@@ -17,7 +17,7 @@ public sealed class CatalogUpdater
             throw new InvalidOperationException(UiText.Current.G("CatalogHttpsRequired"));
 
         using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("DNSYar/0.7.4");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("DNSYar/0.8.0");
         var content = await client.GetStringAsync(uri, cancellationToken);
         if (string.IsNullOrWhiteSpace(content))
             throw new InvalidOperationException(UiText.Current.G("CatalogEmpty"));

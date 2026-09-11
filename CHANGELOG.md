@@ -1,3 +1,7 @@
+## 0.8.0
+- Published as a GitHub Release with a downloadable Windows x64 ZIP.
+- Bilingual minimal UI, bundled Vazirmatn/Inter fonts, and the unpackaged startup XAML fix.
+
 ## 0.7.4
 - Fixed startup XamlParseException on unpackaged WinUI: custom fonts load from files beside the EXE instead of `ms-appx`, and DataTemplates no longer depend on a runtime `T` resource.
 
