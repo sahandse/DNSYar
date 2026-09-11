@@ -12,7 +12,7 @@ DNSYar یک برنامه WinUI 3 برای Windows 10/11 است که DNSها را
 - Microsoft Windows App SDK 2.3.1
 - Unpackaged desktop app
 
-## قابلیت‌های نسخه 0.7.3
+## قابلیت‌های نسخه 0.7.4
 - UI مینیمال دوزبانه (فارسی RTL و English LTR) با سوییچ زبان
 - فونت Vazirmatn و Inter همراه برنامه
 - تم‌های Paper / Ink / Signal
