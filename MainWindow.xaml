@@ -104,9 +104,9 @@
                                         <TextBlock Text="DNS مناسب را هوشمند پیدا کن" Style="{StaticResource PageTitleStyle}" />
                                         <TextBlock Text="سرعت، DNS Resolve و دسترسی واقعی AI، ابزارهای برنامه‌نویسی و سرویس‌های بازی را با هم مقایسه کن." Style="{StaticResource SubtleTextStyle}" MaxWidth="760" />
                                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,5,0,0">
-                                            <Button Content="تست همه DNSها" Click="TestAll_Click" Style="{StaticResource AccentButtonStyle}" Padding="18,10" CornerRadius="12" />
-                                            <Button Content="Smart Auto الآن" Click="SmartRunNow_Click" Style="{StaticResource SecondaryActionButtonStyle}" />
-                                            <Button Content="بازگشت DNS قبلی" Click="Restore_Click" Style="{StaticResource SecondaryActionButtonStyle}" />
+                                            <Button Content="تست همه DNSها" Click="TestAll_Click" Background="#0078D4" Foreground="White" CornerRadius="12" FontWeight="SemiBold" Padding="18,10" CornerRadius="12" />
+                                            <Button Content="Smart Auto الآن" Click="SmartRunNow_Click" />
+                                            <Button Content="بازگشت DNS قبلی" Click="Restore_Click" />
                                         </StackPanel>
                                     </StackPanel>
                                     <Border x:Name="HeroVisual" Grid.Column="1" Width="112" Height="112" CornerRadius="56" BorderThickness="1" BorderBrush="#40FFFFFF" VerticalAlignment="Center">
@@ -183,7 +183,7 @@
                                                 <TextBlock x:Name="BestServicesText" Text="Services: —" />
                                             </StackPanel>
                                         </StackPanel>
-                                        <Button Grid.Column="1" Content="اتصال" Click="ConnectBest_Click" Style="{StaticResource AccentButtonStyle}" Padding="20,10" CornerRadius="12" VerticalAlignment="Center" />
+                                        <Button Grid.Column="1" Content="اتصال" Click="ConnectBest_Click" Background="#0078D4" Foreground="White" CornerRadius="12" FontWeight="SemiBold" Padding="20,10" CornerRadius="12" VerticalAlignment="Center" />
                                     </Grid>
                                 </Border>
 
@@ -220,8 +220,8 @@
                                 <TextBlock x:Name="ListCoverageText" Text="" FontSize="12" Opacity="0.52" TextWrapping="Wrap" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
-                                <Button Content="+ DNS دستی" Click="AddCustomDns_Click" Style="{StaticResource SecondaryActionButtonStyle}" />
-                                <Button Content="تست این بخش" Click="TestVisible_Click" Style="{StaticResource AccentButtonStyle}" Padding="16,9" CornerRadius="12" />
+                                <Button Content="+ DNS دستی" Click="AddCustomDns_Click" />
+                                <Button Content="تست این بخش" Click="TestVisible_Click" Background="#0078D4" Foreground="White" CornerRadius="12" FontWeight="SemiBold" Padding="16,9" CornerRadius="12" />
                             </StackPanel>
                         </Grid>
 
@@ -280,8 +280,8 @@
                                                 </StackPanel>
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center" MinWidth="95">
-                                                <Button Content="اتصال" Click="ConnectProvider_Click" Style="{StaticResource AccentButtonStyle}" Padding="16,8" CornerRadius="11" HorizontalAlignment="Stretch" />
-                                                <Button Content="تست" Click="TestProvider_Click" Style="{StaticResource SecondaryActionButtonStyle}" HorizontalAlignment="Stretch" />
+                                                <Button Content="اتصال" Click="ConnectProvider_Click" Background="#0078D4" Foreground="White" CornerRadius="12" FontWeight="SemiBold" Padding="16,8" CornerRadius="11" HorizontalAlignment="Stretch" />
+                                                <Button Content="تست" Click="TestProvider_Click" HorizontalAlignment="Stretch" />
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -300,7 +300,7 @@
                                 <Grid ColumnSpacing="10" Margin="0,4,0,0">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <TextBox x:Name="SiteAddressBox" PlaceholderText="google.com یا https://chatgpt.com" FlowDirection="LeftToRight" HorizontalContentAlignment="Left" FontFamily="Consolas" CornerRadius="12" />
-                                    <Button x:Name="SiteTestButton" Grid.Column="1" Content="تست همه DNSها" Click="TestSite_Click" Style="{StaticResource AccentButtonStyle}" Padding="18,10" CornerRadius="12" />
+                                    <Button x:Name="SiteTestButton" Grid.Column="1" Content="تست همه DNSها" Click="TestSite_Click" Background="#0078D4" Foreground="White" CornerRadius="12" FontWeight="SemiBold" Padding="18,10" CornerRadius="12" />
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -328,7 +328,7 @@
                                                     <TextBlock Text="{x:Bind ResolvedText, Mode=OneWay}" FlowDirection="LeftToRight" HorizontalAlignment="Right" FontFamily="Consolas" FontSize="11" Opacity="0.6" TextTrimming="CharacterEllipsis" />
                                                     <TextBlock Text="{x:Bind Details, Mode=OneWay}" TextWrapping="Wrap" Opacity="0.68" />
                                                 </StackPanel>
-                                                <Button Grid.Column="1" Content="اتصال" Click="ConnectSiteResult_Click" Style="{StaticResource AccentButtonStyle}" Padding="15,8" CornerRadius="11" VerticalAlignment="Center" />
+                                                <Button Grid.Column="1" Content="اتصال" Click="ConnectSiteResult_Click" Background="#0078D4" Foreground="White" CornerRadius="12" FontWeight="SemiBold" Padding="15,8" CornerRadius="11" VerticalAlignment="Center" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -355,11 +355,11 @@
                                     <TextBlock Text="Vazirmatn و IRANSans باید روی ویندوز نصب باشند. فایل فونت داخل پروژه توزیع نشده است." FontSize="11" Opacity="0.55" TextWrapping="Wrap"/>
                                     <GridView SelectionMode="None" ScrollViewer.HorizontalScrollMode="Disabled" ScrollViewer.VerticalScrollMode="Disabled">
                                         <GridView.ItemsPanel><ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal"/></ItemsPanelTemplate></GridView.ItemsPanel>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="Glass3D" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#7A5CFF"/><GradientStop Color="#4DDBFF" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Glass 3D" HorizontalAlignment="Center"/></StackPanel></Button>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="Aurora" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#6A46FF"/><GradientStop Color="#00C9A7" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Aurora" HorizontalAlignment="Center"/></StackPanel></Button>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="CyberNeon" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FF00D4"/><GradientStop Color="#00F5FF" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Cyber Neon" HorizontalAlignment="Center"/></StackPanel></Button>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="OceanDepth" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#0057B8"/><GradientStop Color="#00B6D6" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Ocean Depth" HorizontalAlignment="Center"/></StackPanel></Button>
-                                        <Button Width="172" Margin="0,0,8,8" Tag="Graphite3D" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#5B6472"/><GradientStop Color="#171A21" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Graphite 3D" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="172" Margin="0,0,8,8" Tag="Glass3D" Click="ThemeButton_Click"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#7A5CFF"/><GradientStop Color="#4DDBFF" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Glass 3D" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="172" Margin="0,0,8,8" Tag="Aurora" Click="ThemeButton_Click"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#6A46FF"/><GradientStop Color="#00C9A7" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Aurora" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="172" Margin="0,0,8,8" Tag="CyberNeon" Click="ThemeButton_Click"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FF00D4"/><GradientStop Color="#00F5FF" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Cyber Neon" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="172" Margin="0,0,8,8" Tag="OceanDepth" Click="ThemeButton_Click"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#0057B8"/><GradientStop Color="#00B6D6" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Ocean Depth" HorizontalAlignment="Center"/></StackPanel></Button>
+                                        <Button Width="172" Margin="0,0,8,8" Tag="Graphite3D" Click="ThemeButton_Click"><StackPanel Spacing="7"><Border Height="52" Width="145" CornerRadius="14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#5B6472"/><GradientStop Color="#171A21" Offset="1"/></LinearGradientBrush></Border.Background></Border><TextBlock Text="Graphite 3D" HorizontalAlignment="Center"/></StackPanel></Button>
                                     </GridView>
                                 </StackPanel>
                             </Border>
@@ -380,7 +380,7 @@
                                         <StackPanel Grid.Row="1" Grid.Column="1" Spacing="5"><TextBlock Text="Failover بعد از چند افت متوالی" Opacity="0.68"/><ComboBox x:Name="SmartFailuresCombo" SelectionChanged="SmartFailuresCombo_SelectionChanged" HorizontalAlignment="Stretch"><ComboBoxItem Content="۱ بار" Tag="1"/><ComboBoxItem Content="۲ بار" Tag="2"/><ComboBoxItem Content="۳ بار" Tag="3"/></ComboBox></StackPanel>
                                     </Grid>
                                     <Border Style="{StaticResource SoftCardBorderStyle}" Padding="12">
-                                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Spacing="3"><TextBlock Text="وضعیت پایش" FontSize="11" Opacity="0.55"/><TextBlock x:Name="SmartAutoStatusText" Text="خاموش • همه‌کاره • آماده" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel><Button Grid.Column="1" Content="بررسی و انتخاب الآن" Click="SmartRunNow_Click" Style="{StaticResource AccentButtonStyle}" Padding="14,8" CornerRadius="11" VerticalAlignment="Center"/></Grid>
+                                        <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Spacing="3"><TextBlock Text="وضعیت پایش" FontSize="11" Opacity="0.55"/><TextBlock x:Name="SmartAutoStatusText" Text="خاموش • همه‌کاره • آماده" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel><Button Grid.Column="1" Content="بررسی و انتخاب الآن" Click="SmartRunNow_Click" Background="#0078D4" Foreground="White" CornerRadius="12" FontWeight="SemiBold" Padding="14,8" CornerRadius="11" VerticalAlignment="Center"/></Grid>
                                     </Border>
                                     <TextBlock Text="برای جلوگیری از سوییچ بی‌دلیل، ابتدا فقط DNS فعال تست می‌شود. اگر چند بار پشت‌سرهم افت کند، همه گزینه‌های مناسب همان پروفایل تست و بهترین DNS سالم جایگزین می‌شود." Style="{StaticResource SubtleTextStyle}" FontSize="12"/>
                                 </StackPanel>
@@ -404,9 +404,9 @@
                                     <StackPanel Orientation="Horizontal" Spacing="9"><Border Width="38" Height="38" CornerRadius="12" Background="#1806B6D4"><FontIcon Glyph="&#xE895;" Foreground="#22D3EE" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><StackPanel><TextBlock Text="بروزرسانی DNS از GitHub" Style="{StaticResource SectionTitleStyle}"/><TextBlock Text="Merge امن با DNSهای موجود" FontSize="11" Opacity="0.55"/></StackPanel></StackPanel>
                                     <ToggleSwitch x:Name="AutoUpdateToggle" Header="DNSهای جدید را خودکار از GitHub دریافت کن" Toggled="AutoUpdateToggle_Toggled"/>
                                     <TextBlock Text="DNSهای دستی کاربر با بروزرسانی GitHub حذف یا جایگزین نمی‌شوند." Style="{StaticResource SubtleTextStyle}" FontSize="12"/>
-                                    <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="آدرس فایل GitHub — JSON یا TXT" Opacity="0.68"/><TextBox x:Name="UpdateUrlBox" PlaceholderText="https://github.com/.../blob/main/dns.json" TextChanged="UpdateUrlBox_TextChanged" FlowDirection="LeftToRight" CornerRadius="10"/></StackPanel><Button Grid.Column="1" Content="منبع پیش‌فرض" Click="ResetGithubSource_Click" VerticalAlignment="Bottom" Style="{StaticResource SecondaryActionButtonStyle}"/></Grid>
+                                    <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="آدرس فایل GitHub — JSON یا TXT" Opacity="0.68"/><TextBox x:Name="UpdateUrlBox" PlaceholderText="https://github.com/.../blob/main/dns.json" TextChanged="UpdateUrlBox_TextChanged" FlowDirection="LeftToRight" CornerRadius="10"/></StackPanel><Button Grid.Column="1" Content="منبع پیش‌فرض" Click="ResetGithubSource_Click" VerticalAlignment="Bottom"/></Grid>
                                     <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><StackPanel Spacing="5"><TextBlock Text="فاصله بروزرسانی" Opacity="0.68"/><ComboBox x:Name="UpdateIntervalCombo" SelectionChanged="UpdateIntervalCombo_SelectionChanged" MinWidth="175"><ComboBoxItem Content="هر ۶ ساعت" Tag="6"/><ComboBoxItem Content="هر ۱۲ ساعت" Tag="12"/><ComboBoxItem Content="هر ۲۴ ساعت" Tag="24"/><ComboBoxItem Content="هر ۳ روز" Tag="72"/></ComboBox></StackPanel><StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="3"><TextBlock Text="منبع پیش‌فرض: Iran-DNS-Switcher / dns_servers.txt" FontSize="11" Opacity="0.55" TextWrapping="Wrap"/><TextBlock x:Name="LastUpdateText" Text="آخرین بروزرسانی: —" FontSize="11" Opacity="0.7"/></StackPanel></Grid>
-                                    <StackPanel Orientation="Horizontal" Spacing="8"><Button Content="بررسی بروزرسانی الآن" Click="ManualUpdate_Click" Style="{StaticResource AccentButtonStyle}" Padding="16,8" CornerRadius="11"/><Button Content="+ افزودن DNS دستی" Click="AddCustomDns_Click" Style="{StaticResource SecondaryActionButtonStyle}"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8"><Button Content="بررسی بروزرسانی الآن" Click="ManualUpdate_Click" Background="#0078D4" Foreground="White" CornerRadius="12" FontWeight="SemiBold" Padding="16,8" CornerRadius="11"/><Button Content="+ افزودن DNS دستی" Click="AddCustomDns_Click"/></StackPanel>
                                 </StackPanel>
                             </Border>
 
@@ -416,7 +416,7 @@
                                     <ToggleSwitch x:Name="RestoreOnExitToggle" Header="پس از بستن برنامه یا خاموش/ری‌استارت ویندوز، DNS قبلی را برگردان" Toggled="RestoreOnExitToggle_Toggled"/>
                                     <ToggleSwitch x:Name="CrashRecoveryToggle" Header="اگر برنامه ناگهانی بسته شد، در اجرای بعدی DNS قبلی را بازیابی کن" Toggled="CrashRecoveryToggle_Toggled"/>
                                     <InfoBar IsOpen="True" IsClosable="False" Severity="Informational" CornerRadius="12" Title="نکته" Message="DNSYar قبل از اولین تغییر، تنظیم واقعی کارت شبکه را ذخیره می‌کند؛ DNS دستی قبلی دقیقاً برمی‌گردد و اگر حالت DHCP بوده، دوباره DHCP فعال می‌شود."/>
-                                    <StackPanel Orientation="Horizontal" Spacing="8"><Button Content="بازگشت کارت انتخابی" Click="Restore_Click" Style="{StaticResource SecondaryActionButtonStyle}"/><Button Content="بازگردانی همه" Click="RestoreAll_Click" Style="{StaticResource SecondaryActionButtonStyle}"/></StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8"><Button Content="بازگشت کارت انتخابی" Click="Restore_Click"/><Button Content="بازگردانی همه" Click="RestoreAll_Click"/></StackPanel>
                                 </StackPanel>
                             </Border>
 
