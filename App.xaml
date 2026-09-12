@@ -10,15 +10,17 @@
             </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="CardBorderStyle" TargetType="Border">
-                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
-                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="Background" Value="#1C1C1C" />
+                <Setter Property="BorderBrush" Value="#333333" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="CornerRadius" Value="20" />
                 <Setter Property="Padding" Value="18" />
             </Style>
 
-            <Style x:Key="SoftCardBorderStyle" TargetType="Border" BasedOn="{StaticResource CardBorderStyle}">
-                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+            <Style x:Key="SoftCardBorderStyle" TargetType="Border">
+                <Setter Property="Background" Value="#1C1C1C" />
+                <Setter Property="BorderBrush" Value="#333333" />
+                <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="CornerRadius" Value="16" />
                 <Setter Property="Padding" Value="14" />
             </Style>

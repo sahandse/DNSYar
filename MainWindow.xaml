@@ -41,7 +41,7 @@
             <NavigationView.PaneHeader>
                 <StackPanel Margin="12,8,12,18" Spacing="3">
                     <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Border Width="36" Height="36" CornerRadius="12" Background="{ThemeResource AccentFillColorDefaultBrush}">
+                        <Border Width="36" Height="36" CornerRadius="12" Background="#0078D4">
                             <FontIcon Glyph="&#xE968;" Foreground="White" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <StackPanel VerticalAlignment="Center">
@@ -53,7 +53,7 @@
             </NavigationView.PaneHeader>
 
             <NavigationView.PaneFooter>
-                <Border Margin="10,8,10,14" Padding="12" CornerRadius="14" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Border Margin="10,8,10,14" Padding="12" CornerRadius="14" Background="#1C1C1C">
                     <StackPanel Spacing="3">
                         <TextBlock Text="سازنده" FontSize="10" Opacity="0.55" />
                         <TextBlock Text="سهند رضوان" FontWeight="SemiBold" FontSize="12" />
@@ -269,7 +269,7 @@
                                                     <TextBlock Text="{x:Bind Status, Mode=OneWay}" Foreground="{x:Bind StatusBrush, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" />
                                                 </StackPanel>
                                                 <TextBlock Text="{x:Bind Recommendation, Mode=OneWay}" TextWrapping="Wrap" Opacity="0.74" />
-                                                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="12" Padding="11,8">
+                                                <Border Background="#1C1C1C" CornerRadius="12" Padding="11,8">
                                                     <TextBlock Text="{x:Bind ServiceDetailsText, Mode=OneWay}" TextWrapping="Wrap" FontSize="12" LineHeight="20" />
                                                 </Border>
                                                 <StackPanel Orientation="Horizontal" Spacing="16">
@@ -293,7 +293,7 @@
                     <!-- WEBSITE DNS TEST -->
                     <Grid x:Name="SiteTestPage" Visibility="Collapsed" RowSpacing="14" MaxWidth="1320" HorizontalAlignment="Stretch">
                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                        <Border CornerRadius="24" Padding="22" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Border CornerRadius="24" Padding="22" BorderThickness="1" BorderBrush="#333333" Background="#1C1C1C">
                             <StackPanel Spacing="9">
                                 <StackPanel Orientation="Horizontal" Spacing="10"><Border Width="40" Height="40" CornerRadius="13" Background="#18256BEB"><FontIcon Glyph="&#xE774;" Foreground="#60A5FA" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><StackPanel><TextBlock Text="تست سایت با همه DNSها" Style="{StaticResource PageTitleStyle}"/><TextBlock Text="بدون تغییر DNS فعلی ویندوز" Opacity="0.55" FontSize="11"/></StackPanel></StackPanel>
                                 <TextBlock Text="دامنه را وارد کن؛ هر DNS جداگانه Resolve و سپس اتصال واقعی HTTP/HTTPS بررسی می‌شود." Style="{StaticResource SubtleTextStyle}" />
@@ -427,7 +427,7 @@
                     </ScrollViewer>
 
                     <Grid x:Name="BusyOverlay" Visibility="Collapsed" Background="#52000000">
-                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="20" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="260">
+                        <Border Background="#1C1C1C" BorderBrush="#333333" BorderThickness="1" CornerRadius="20" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="260">
                             <StackPanel Spacing="12" HorizontalAlignment="Center"><ProgressRing IsActive="True" Width="42" Height="42"/><TextBlock x:Name="BusyText" Text="در حال تست…" FontWeight="SemiBold" TextAlignment="Center" TextWrapping="Wrap"/></StackPanel>
                         </Border>
                     </Grid>
