@@ -11,7 +11,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.Win32;
 using Windows.Foundation;
 using Windows.UI;
-using Forms = System.Windows.Forms;
 
 namespace DNSYar;
 
@@ -499,7 +498,7 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             if (!silent) ShowInfo("تغییر DNS ناموفق بود", ex.Message, InfoBarSeverity.Error);
-            else _tray.Notify("DNSYar — خطا", ex.Message, Forms.ToolTipIcon.Error);
+            else _tray.Notify("DNSYar — خطا", ex.Message);
             return false;
         }
         finally { if (!silent) SetBusy(false); }
@@ -1105,7 +1104,7 @@ public sealed partial class MainWindow : Window
             }
             _smartAutoFailureStreak = 0;
             UpdateSmartAutoUi($"Failover انجام شد: {previous} ← {best.Name} • امتیاز {best.Score}/100");
-            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  امتیاز {best.Score}/100", Forms.ToolTipIcon.Info);
+            _tray.Notify("Smart Auto DNS", $"{previous} → {best.Name}  |  امتیاز {best.Score}/100");
             if (!silent) ShowInfo("Smart Auto DNS", $"بهترین گزینه انتخاب و فعال شد: {best.Name} ({best.Score}/100)", InfoBarSeverity.Success);
         }
         catch (Exception ex)
