@@ -5,7 +5,7 @@
     xmlns:models="using:DNSYar.Models"
     Title="DNSYar">
 
-    <Grid x:Name="RootGrid" FlowDirection="RightToLeft" FontFamily="Vazirmatn" SizeChanged="RootGrid_SizeChanged">
+    <Grid x:Name="RootGrid" FlowDirection="RightToLeft" SizeChanged="RootGrid_SizeChanged">
         <!-- Local vector/gradient backdrop: no network image dependency. -->
         <Grid x:Name="ThemeBackdrop" IsHitTestVisible="False">
             <Border x:Name="OrbOne" Width="460" Height="460" CornerRadius="230"
