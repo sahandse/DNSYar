@@ -1,4 +1,4 @@
-## 0.7.2
+## 0.7.9
 - رفع خطای `XamlParseException` هنگام اجرای برنامه.
 - اضافه‌شدن استایل `AccentButtonStyle` به `App.xaml` (در WinUI 3 به‌صورت پیش‌فرض وجود نداشت).
 
