@@ -1,3 +1,7 @@
+## 0.7.2
+- رفع خطای `XamlParseException` هنگام اجرای برنامه.
+- اضافه‌شدن استایل `AccentButtonStyle` به `App.xaml` (در WinUI 3 به‌صورت پیش‌فرض وجود نداشت).
+
 ## 0.7.1
 - Added one-click Windows x64 build scripts (`Build-EXE.bat`, `Build-EXE.ps1`).
 - Added INSTALL.md.
