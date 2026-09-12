@@ -80,10 +80,10 @@ public sealed class DnsProvider : INotifyPropertyChanged
     private static SolidColorBrush Solid(string hex)
     {
         var raw = hex.TrimStart('#');
-        return new SolidColorBrush(ColorHelper.FromArgb(255,
-            Convert.ToByte(raw.Substring(0, 2), 16),
-            Convert.ToByte(raw.Substring(2, 2), 16),
-            Convert.ToByte(raw.Substring(4, 2), 16)));
+        return new SolidColorBrush(new Color { A = 255,
+            R = Convert.ToByte(raw.Substring(0, 2), 16),
+            G = Convert.ToByte(raw.Substring(2, 2), 16),
+            B = Convert.ToByte(raw.Substring(4, 2), 16) });
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

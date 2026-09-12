@@ -13,8 +13,8 @@ public sealed class SiteDnsTestResult : INotifyPropertyChanged
     private string _httpText = "HTTP: —";
     private string _details = "هنوز تست نشده";
     private string _resolvedText = "IP: —";
-    private SolidColorBrush _statusBrush = new(Colors.Gray);
-    private SolidColorBrush _cardBrush = new(ColorHelper.FromArgb(42, 100, 116, 139));
+    private SolidColorBrush _statusBrush = new(new Color { A = 255, R = 128, G = 128, B = 128 });
+    private SolidColorBrush _cardBrush = new(new Color { A = 42, R = 100, G = 116, B = 139 });
     private bool _isTesting;
     private bool _isSuccess;
     private double? _httpMs;
@@ -47,8 +47,8 @@ public sealed class SiteDnsTestResult : INotifyPropertyChanged
         HttpText = "HTTP: …";
         Details = "در حال Resolve و بررسی اتصال واقعی سایت";
         ResolvedText = "IP: …";
-        StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 100, 116, 139));
-        CardBrush = new SolidColorBrush(ColorHelper.FromArgb(70, 100, 116, 139));
+        StatusBrush = new SolidColorBrush(new Color { A = 255, R = 100, G = 116, B = 139 });
+        CardBrush = new SolidColorBrush(new Color { A = 70, R = 100, G = 116, B = 139 });
     }
 
     public void Complete(SiteProbeResult result)
@@ -67,8 +67,8 @@ public sealed class SiteDnsTestResult : INotifyPropertyChanged
         {
             StatusText = "باز می‌شود";
             Details = result.FinalUri is null ? "اتصال واقعی سایت با این DNS موفق بود" : $"موفق • {result.FinalUri.Host}";
-            StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 22, 163, 74));
-            CardBrush = new SolidColorBrush(ColorHelper.FromArgb(95, 22, 163, 74));
+            StatusBrush = new SolidColorBrush(new Color { A = 255, R = 22, G = 163, B = 74 });
+            CardBrush = new SolidColorBrush(new Color { A = 95, R = 22, G = 163, B = 74 });
         }
         else
         {
@@ -76,8 +76,8 @@ public sealed class SiteDnsTestResult : INotifyPropertyChanged
             Details = result.DnsResolved
                 ? (string.IsNullOrWhiteSpace(result.Error) ? "DNS پاسخ داد، اما اتصال سایت ناموفق بود" : result.Error)
                 : "این DNS دامنه را Resolve نکرد";
-            StatusBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 220, 38, 38));
-            CardBrush = new SolidColorBrush(ColorHelper.FromArgb(95, 220, 38, 38));
+            StatusBrush = new SolidColorBrush(new Color { A = 255, R = 220, G = 38, B = 38 });
+            CardBrush = new SolidColorBrush(new Color { A = 95, R = 220, G = 38, B = 38 });
         }
     }
 

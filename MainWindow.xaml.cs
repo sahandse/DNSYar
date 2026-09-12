@@ -121,7 +121,7 @@ public sealed partial class MainWindow : Window
             _targets = await _store.LoadTargetsAsync();
             UpdateCoverageCounters();
 
-            RootGrid.FontFamily = new FontFamily(_settings.FontFamily);
+            NavView.FontFamily = new FontFamily(_settings.FontFamily);
             SelectFontInCombo(_settings.FontFamily);
             ApplyTheme(_settings.ThemeName);
             AutoUpdateToggle.IsOn = _settings.AutoUpdate;
@@ -1295,12 +1295,12 @@ public sealed partial class MainWindow : Window
     {
         var raw = hex.Trim().TrimStart('#');
         if (raw.Length == 6) raw = "FF" + raw;
-        if (raw.Length != 8) return ColorHelper.FromArgb(255, 0, 0, 0);
-        return ColorHelper.FromArgb(
-            Convert.ToByte(raw[..2], 16),
-            Convert.ToByte(raw.Substring(2, 2), 16),
-            Convert.ToByte(raw.Substring(4, 2), 16),
-            Convert.ToByte(raw.Substring(6, 2), 16));
+        if (raw.Length != 8) return new Color { A = 255, R = 0, G = 0, B = 0 };
+        return new Color {
+            A = Convert.ToByte(raw[..2], 16),
+            R = Convert.ToByte(raw.Substring(2, 2), 16),
+            G = Convert.ToByte(raw.Substring(4, 2), 16),
+            B = Convert.ToByte(raw.Substring(6, 2), 16) };
     }
 
     private sealed record ThemePreset(
@@ -1318,7 +1318,7 @@ public sealed partial class MainWindow : Window
     private async void FontCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (FontCombo.SelectedItem is not ComboBoxItem item || item.Content is not string family) return;
-        RootGrid.FontFamily = new FontFamily(family);
+        NavView.FontFamily = new FontFamily(family);
         if (_initializing) return;
         _settings.FontFamily = family;
         await _store.SaveSettingsAsync(_settings);
