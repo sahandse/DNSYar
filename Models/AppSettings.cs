@@ -6,8 +6,9 @@ public sealed class AppSettings
     public bool AutoUpdate { get; set; } = true;
     public int AutoUpdateHours { get; set; } = 24;
     public string UpdateUrl { get; set; } = DefaultGithubUpdateUrl;
-    public string FontFamily { get; set; } = "Vazirmatn";
-    public string ThemeName { get; set; } = "Glass3D";
+    public string FontFamily { get; set; } = "Auto";
+    public string ThemeName { get; set; } = "Paper";
+    public string Language { get; set; } = "fa";
     public bool RestoreDnsOnExit { get; set; } = true;
     public bool RecoverDnsAfterUnexpectedExit { get; set; } = true;
     public string? LastAdapterId { get; set; }

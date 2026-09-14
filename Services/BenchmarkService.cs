@@ -12,7 +12,7 @@ public sealed class BenchmarkService
 
     public async Task TestProviderAsync(DnsProvider provider, IReadOnlyList<ServiceTarget> targets, CancellationToken cancellationToken)
     {
-        provider.Status = "در حال تست…";
+        provider.Status = UiText.Current.Testing;
         provider.ServiceResults.Clear();
 
         var ping = await _ping.TestAsync(provider.Primary, 3, 1100);
@@ -45,7 +45,10 @@ public sealed class BenchmarkService
         provider.Score = CalculateScore(provider, targets);
         provider.Recommendation = BuildRecommendation(provider, targets);
         provider.ServiceDetailsText = BuildServiceDetails(provider, targets);
-        provider.Status = provider.Score >= 85 ? "عالی" : provider.Score >= 70 ? "خوب" : provider.Score >= 45 ? "متوسط" : "ضعیف";
+        provider.Status = provider.Score >= 85 ? UiText.Current.StatusExcellent
+            : provider.Score >= 70 ? UiText.Current.StatusGood
+            : provider.Score >= 45 ? UiText.Current.StatusFair
+            : UiText.Current.StatusWeak;
     }
 
     private static int CalculateScore(DnsProvider p, IReadOnlyList<ServiceTarget> targets)
@@ -79,23 +82,23 @@ public sealed class BenchmarkService
 
         if (onlyGame)
         {
-            if (game >= .85) return "پیشنهاد قوی برای پلتفرم‌های بازی؛ دسترسی و تاخیر در وضعیت مناسبی است";
-            if (game >= .60) return "مناسب بازی؛ بعضی پلتفرم‌ها یا Endpointها محدود هستند";
-            return "برای سرویس‌های بازی پیشنهاد نمی‌شود";
+            if (game >= .85) return UiText.Current.G("RecGameStrong");
+            if (game >= .60) return UiText.Current.G("RecGameOk");
+            return UiText.Current.G("RecGameNo");
         }
 
-        if (ai >= .85 && dev >= .85 && game >= .75) return "پیشنهاد عمومی برای AI، برنامه‌نویسی و بازی";
-        if (ai >= .85 && dev >= .85) return "پیشنهاد برای هوش مصنوعی و برنامه‌نویسی";
-        if (ai >= .85) return "پیشنهاد برای ChatGPT، Gemini و سرویس‌های AI";
-        if (dev >= .85) return "پیشنهاد برای GitHub، Docker، npm و ابزارهای توسعه";
-        if (game >= .85) return "پیشنهاد مناسب برای سرویس‌های بازی";
-        if (ai >= .60 || dev >= .60 || game >= .60) return "مناسب استفاده عمومی؛ بعضی سرویس‌ها محدود هستند";
-        return "برای سرویس‌های هدف پیشنهاد نمی‌شود";
+        if (ai >= .85 && dev >= .85 && game >= .75) return UiText.Current.G("RecAll");
+        if (ai >= .85 && dev >= .85) return UiText.Current.G("RecAiDev");
+        if (ai >= .85) return UiText.Current.G("RecAi");
+        if (dev >= .85) return UiText.Current.G("RecDev");
+        if (game >= .85) return UiText.Current.G("RecGame");
+        if (ai >= .60 || dev >= .60 || game >= .60) return UiText.Current.G("RecMixed");
+        return UiText.Current.G("RecNo");
     }
 
     private static string BuildServiceDetails(DnsProvider provider, IReadOnlyList<ServiceTarget> targets)
     {
-        if (targets.Count == 0) return "سرویس هدفی برای تست تعریف نشده است.";
+        if (targets.Count == 0) return UiText.Current.G("NoTargets");
 
         var isGameOnly = targets.All(x => x.Category.Equals("game", StringComparison.OrdinalIgnoreCase));
         if (isGameOnly)

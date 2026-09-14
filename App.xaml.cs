@@ -1,21 +1,32 @@
-using System.Diagnostics;
-using System.IO;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using DNSYar.Services;
 
 namespace DNSYar;
 
 public partial class App : Application
 {
+    private const string SingleInstanceName = @"Local\Sahandse.DNSYar.SingleInstance";
     private Window? _window;
+    private Mutex? _singleInstance;
 
     public App()
     {
         InitializeComponent();
+        Resources["T"] = UiText.Current;
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        _singleInstance = new Mutex(true, SingleInstanceName, out var createdNew);
+        if (!createdNew)
+        {
+            _singleInstance.Dispose();
+            _singleInstance = null;
+            Environment.Exit(0);
+            return;
+        }
+
         try
         {
             _window = new MainWindow();
@@ -23,48 +34,33 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            var fullError = ex.ToString();
-            var logPath = Path.Combine(AppContext.BaseDirectory, "crash.log");
-            try { File.WriteAllText(logPath, $"[{DateTime.Now}]\r\n{fullError}\r\n"); } catch { }
-
+            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DNSYar");
+            var logPath = Path.Combine(dir, "launch-error.txt");
             try
             {
-                _window = new Window();
-                _window.Content = new Grid
+                Directory.CreateDirectory(dir);
+                File.WriteAllText(logPath, $"[{DateTime.Now:O}]\r\n{ex}\r\n");
+            }
+            catch { }
+
+            _window = new Window
+            {
+                Title = "DNSYar — Startup Error",
+                Content = new StackPanel
                 {
+                    Spacing = 12,
+                    Padding = new Thickness(24),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
                     Children =
                     {
-                        new StackPanel
-                        {
-                            Spacing = 12,
-                            Padding = new Thickness(24),
-                            VerticalAlignment = VerticalAlignment.Center,
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            Children =
-                            {
-                                new TextBlock { Text = "DNSYar — Startup Error", FontSize = 22, FontWeight = Microsoft.UI.Text.FontWeights.Bold },
-                                new TextBlock { Text = ex.Message, TextWrapping = TextWrapping.Wrap, MaxWidth = 500 },
-                                new TextBlock { Text = $"Log saved to: {logPath}", FontSize = 11, Opacity = 0.5 }
-                            }
-                        }
+                        new TextBlock { Text = "DNSYar — Startup Error", FontSize = 22, FontWeight = Microsoft.UI.Text.FontWeights.Bold },
+                        new TextBlock { Text = ex.Message, TextWrapping = TextWrapping.Wrap, MaxWidth = 560 },
+                        new TextBlock { Text = $"Log: {logPath}", FontSize = 11, Opacity = 0.6 }
                     }
-                };
-                _window.Title = "DNSYar Error";
-                _window.Activate();
-            }
-            catch
-            {
-                try
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "notepad.exe",
-                        Arguments = $"\"{logPath}\"",
-                        UseShellExecute = true
-                    });
                 }
-                catch { }
-            }
+            };
+            _window.Activate();
         }
     }
 }
