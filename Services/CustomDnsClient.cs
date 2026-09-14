@@ -15,7 +15,7 @@ public sealed class CustomDnsClient
         if (!IPAddress.TryParse(dnsServer, out var serverIp))
             return new(0, Array.Empty<IPAddress>(), false);
 
-        var packet = BuildQuery(host);
+        var packet = BuildQuery(host, out var queryId);
         using var udp = new UdpClient(serverIp.AddressFamily);
         udp.Connect(new IPEndPoint(serverIp, 53));
 
@@ -27,7 +27,7 @@ public sealed class CustomDnsClient
             timeout.CancelAfter(timeoutMs);
             var result = await udp.ReceiveAsync(timeout.Token);
             sw.Stop();
-            var addresses = ParseARecords(result.Buffer);
+            var addresses = ParseARecords(result.Buffer, queryId);
             return new(sw.Elapsed.TotalMilliseconds, addresses, addresses.Count > 0);
         }
         catch
@@ -37,11 +37,11 @@ public sealed class CustomDnsClient
         }
     }
 
-    private static byte[] BuildQuery(string host)
+    private static byte[] BuildQuery(string host, out ushort id)
     {
         using var ms = new MemoryStream();
         using var bw = new BinaryWriter(ms);
-        var id = (ushort)Random.Shared.Next(ushort.MaxValue);
+        id = (ushort)Random.Shared.Next(1, ushort.MaxValue);
         WriteUInt16BE(bw, id);
         WriteUInt16BE(bw, 0x0100); // recursion desired
         WriteUInt16BE(bw, 1); // questions
@@ -49,9 +49,10 @@ public sealed class CustomDnsClient
         WriteUInt16BE(bw, 0);
         WriteUInt16BE(bw, 0);
 
-        foreach (var label in host.Trim('.').Split('.'))
+        foreach (var label in host.Trim('.').Split('.', StringSplitOptions.RemoveEmptyEntries))
         {
             var bytes = Encoding.ASCII.GetBytes(label);
+            if (bytes.Length == 0 || bytes.Length > 63) continue;
             bw.Write((byte)bytes.Length);
             bw.Write(bytes);
         }
@@ -61,10 +62,17 @@ public sealed class CustomDnsClient
         return ms.ToArray();
     }
 
-    private static List<IPAddress> ParseARecords(byte[] data)
+    private static List<IPAddress> ParseARecords(byte[] data, ushort expectedId)
     {
         var addresses = new List<IPAddress>();
         if (data.Length < 12) return addresses;
+
+        var responseId = ReadUInt16BE(data, 0);
+        if (responseId != expectedId) return addresses;
+
+        var flags = ReadUInt16BE(data, 2);
+        if ((flags & 0x8000) == 0) return addresses; // not a response
+        if ((flags & 0x000F) != 0) return addresses; // RCODE must be NoError
 
         var qd = ReadUInt16BE(data, 4);
         var an = ReadUInt16BE(data, 6);
@@ -72,15 +80,13 @@ public sealed class CustomDnsClient
 
         for (var i = 0; i < qd; i++)
         {
-            SkipName(data, ref offset);
+            if (!SkipName(data, ref offset) || offset + 4 > data.Length) return addresses;
             offset += 4;
-            if (offset > data.Length) return addresses;
         }
 
-        for (var i = 0; i < an && offset < data.Length; i++)
+        for (var i = 0; i < an; i++)
         {
-            SkipName(data, ref offset);
-            if (offset + 10 > data.Length) break;
+            if (!SkipName(data, ref offset) || offset + 10 > data.Length) break;
             var type = ReadUInt16BE(data, offset); offset += 2;
             var klass = ReadUInt16BE(data, offset); offset += 2;
             offset += 4; // TTL
@@ -96,19 +102,33 @@ public sealed class CustomDnsClient
         return addresses;
     }
 
-    private static void SkipName(byte[] data, ref int offset)
+    private static bool SkipName(byte[] data, ref int offset)
     {
+        var hops = 0;
         while (offset < data.Length)
         {
-            var len = data[offset++];
-            if (len == 0) return;
+            var len = data[offset];
+            if (len == 0)
+            {
+                offset++;
+                return true;
+            }
+
             if ((len & 0xC0) == 0xC0)
             {
-                offset++; // compression pointer second byte
-                return;
+                if (offset + 1 >= data.Length) return false;
+                offset += 2;
+                return true;
             }
+
+            if ((len & 0xC0) != 0) return false;
+            offset++;
+            if (offset + len > data.Length) return false;
             offset += len;
+            if (++hops > 128) return false;
         }
+
+        return false;
     }
 
     private static ushort ReadUInt16BE(byte[] data, int offset) => BinaryPrimitives.ReadUInt16BigEndian(data.AsSpan(offset, 2));

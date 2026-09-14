@@ -1,0 +1,38 @@
+name: گزارش خطا
+description: گزارش مشکل Build، اجرا، تست یا تغییر DNS
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: dropdown
+    id: windows
+    attributes:
+      label: نسخه ویندوز
+      options: [Windows 11, Windows 10, سایر]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: نسخه DNSYar
+      placeholder: 0.8.1
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: مراحل بازتولید
+      description: از اجرای برنامه تا مشاهده خطا را مرحله‌به‌مرحله بنویسید.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: خطا یا Log
+      description: اطلاعات محرمانه، IP خصوصی یا نام سازمان را پیش از ارسال حذف کنید.
+      render: shell
+  - type: checkboxes
+    id: dns_restore
+    attributes:
+      label: وضعیت DNS
+      options:
+        - label: بررسی کردم که DNS قبلی پس از خروج یا Restore بازگردانده شده است.

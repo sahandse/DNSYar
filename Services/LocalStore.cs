@@ -34,9 +34,7 @@ public sealed class LocalStore
 
     public async Task SaveSettingsAsync(AppSettings settings)
     {
-        Directory.CreateDirectory(RootPath);
-        await using var fs = File.Create(SettingsPath);
-        await JsonSerializer.SerializeAsync(fs, settings, JsonOptions);
+        await WriteJsonAtomicAsync(SettingsPath, settings);
     }
 
     public async Task<List<DnsProvider>> LoadProvidersAsync()
@@ -63,9 +61,7 @@ public sealed class LocalStore
     // so a GitHub refresh can never overwrite or delete the user's own DNS entries.
     public async Task SaveProvidersAsync(IEnumerable<DnsProvider> providers)
     {
-        Directory.CreateDirectory(RootPath);
-        await using var fs = File.Create(CatalogPath);
-        await JsonSerializer.SerializeAsync(fs, providers.Where(x => !x.IsCustom), JsonOptions);
+        await WriteJsonAtomicAsync(CatalogPath, providers.Where(x => !x.IsCustom));
     }
 
     public async Task<List<DnsProvider>> LoadCustomProvidersAsync()
@@ -81,9 +77,7 @@ public sealed class LocalStore
 
     public async Task SaveCustomProvidersAsync(IEnumerable<DnsProvider> providers)
     {
-        Directory.CreateDirectory(RootPath);
-        await using var fs = File.Create(CustomCatalogPath);
-        await JsonSerializer.SerializeAsync(fs, providers.Where(x => x.IsCustom), JsonOptions);
+        await WriteJsonAtomicAsync(CustomCatalogPath, providers.Where(x => x.IsCustom));
     }
 
     public async Task<List<ServiceTarget>> LoadTargetsAsync()
@@ -106,15 +100,46 @@ public sealed class LocalStore
 
     public async Task SaveDnsSnapshotsAsync(IEnumerable<DnsSnapshot> snapshots)
     {
-        Directory.CreateDirectory(RootPath);
-        await using var fs = File.Create(SnapshotPath);
-        await JsonSerializer.SerializeAsync(fs, snapshots, JsonOptions);
+        await WriteJsonAtomicAsync(SnapshotPath, snapshots);
     }
 
     public void SaveDnsSnapshots(IEnumerable<DnsSnapshot> snapshots)
     {
+        WriteTextAtomic(SnapshotPath, JsonSerializer.Serialize(snapshots, JsonOptions));
+    }
+
+    private async Task WriteJsonAtomicAsync<T>(string path, T value)
+    {
         Directory.CreateDirectory(RootPath);
-        File.WriteAllText(SnapshotPath, JsonSerializer.Serialize(snapshots, JsonOptions));
+        var temporaryPath = path + ".tmp";
+        try
+        {
+            await using (var fs = new FileStream(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true))
+            {
+                await JsonSerializer.SerializeAsync(fs, value, JsonOptions);
+                await fs.FlushAsync();
+            }
+            File.Move(temporaryPath, path, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+        }
+    }
+
+    private void WriteTextAtomic(string path, string value)
+    {
+        Directory.CreateDirectory(RootPath);
+        var temporaryPath = path + ".tmp";
+        try
+        {
+            File.WriteAllText(temporaryPath, value);
+            File.Move(temporaryPath, path, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+        }
     }
 
     private static bool SameProvider(DnsProvider a, DnsProvider b) =>
