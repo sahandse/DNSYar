@@ -12,8 +12,16 @@ public partial class App : Application
 
     public App()
     {
-        InitializeComponent();
-        Resources["T"] = UiText.Current;
+        try
+        {
+            InitializeComponent();
+            Resources["T"] = UiText.Current;
+        }
+        catch (Exception ex)
+        {
+            StartupDiagnostics.Report(ex);
+            throw;
+        }
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)

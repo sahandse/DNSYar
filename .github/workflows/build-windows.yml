@@ -41,6 +41,8 @@ jobs:
         shell: pwsh
         run: |
           if (!(Test-Path .\Release\win-x64\DNSYar.exe)) { throw 'DNSYar.exe was not produced.' }
+          if (!(Test-Path .\Release\win-x64\Microsoft.UI.Xaml.dll)) { throw 'Windows App SDK was not packaged.' }
+          if (!(Test-Path .\Release\win-x64\Microsoft.WindowsAppRuntime.Bootstrap.dll)) { throw 'Windows App Runtime bootstrapper was not packaged.' }
           if (!(Test-Path .\Release\win-x64\Data\dns.json)) { throw 'DNS catalog was not packaged.' }
           if (!(Test-Path .\Release\win-x64\Data\services.json)) { throw 'Service catalog was not packaged.' }
       - name: Upload build artifact
