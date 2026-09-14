@@ -13,7 +13,7 @@ public sealed class CatalogUpdater
     public async Task<CatalogUpdateResult> DownloadAsync(string url, CancellationToken cancellationToken = default)
     {
         var normalizedUrl = NormalizeGithubUrl(url);
-        if (!Uri.TryCreate(normalizedUrl, UriKind.Absolute, out var uri) || uri.Scheme != "https")
+        if (!CatalogUrl.IsHttps(normalizedUrl) || !Uri.TryCreate(normalizedUrl, UriKind.Absolute, out var uri))
             throw new InvalidOperationException(UiText.Current.G("CatalogHttpsRequired"));
 
         using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
@@ -57,19 +57,7 @@ public sealed class CatalogUpdater
         return new CatalogUpdateResult(list, normalizedUrl, format);
     }
 
-    public static string NormalizeGithubUrl(string url)
-    {
-        var value = url.Trim();
-        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri)) return value;
-        if (!uri.Host.Equals("github.com", StringComparison.OrdinalIgnoreCase)) return value;
-
-        var parts = uri.AbsolutePath.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
-        // https://github.com/owner/repo/blob/branch/path -> raw.githubusercontent.com/owner/repo/branch/path
-        if (parts.Length >= 5 && parts[2].Equals("blob", StringComparison.OrdinalIgnoreCase))
-            return $"https://raw.githubusercontent.com/{parts[0]}/{parts[1]}/{parts[3]}/{string.Join("/", parts.Skip(4))}";
-
-        return value;
-    }
+    public static string NormalizeGithubUrl(string url) => CatalogUrl.NormalizeGithubUrl(url);
 
     private static List<DnsProvider> ParseJson(string json)
     {
