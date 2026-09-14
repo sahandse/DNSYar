@@ -1,3 +1,9 @@
+## 0.8.2
+- Fixed the silent startup failure caused by custom WinUI button styles during application resource loading.
+- Windows App SDK is now self-contained by default, including local/manual publish commands.
+- Startup failures during `App.xaml` loading are written to `%LocalAppData%\DNSYar\launch-error.txt` and shown in a native error dialog.
+- Release validation now verifies that the Windows App SDK runtime files are included.
+
 ## 0.8.1
 - Merged the stable 0.7.9 startup/XAML fixes with the bilingual 0.8 UI.
 - Catalog updates require HTTPS and DNS responses are validated defensively.

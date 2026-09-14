@@ -40,8 +40,8 @@
                     </StackPanel>
                     <Border CornerRadius="10" Background="{StaticResource AppSubtleFillBrush}" Padding="4">
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <Button x:Name="LanguageFaButton" Content="{x:Bind T.LangFa, Mode=OneWay}" Click="LanguageFa_Click" Style="{StaticResource LangButtonStyle}"/>
-                            <Button x:Name="LanguageEnButton" Content="{x:Bind T.LangEn, Mode=OneWay}" Click="LanguageEn_Click" Style="{StaticResource LangButtonStyle}"/>
+                            <Button x:Name="LanguageFaButton" Content="{x:Bind T.LangFa, Mode=OneWay}" Click="LanguageFa_Click" CornerRadius="8" Padding="12,6" MinWidth="72" FontSize="12"/>
+                            <Button x:Name="LanguageEnButton" Content="{x:Bind T.LangEn, Mode=OneWay}" Click="LanguageEn_Click" CornerRadius="8" Padding="12,6" MinWidth="72" FontSize="12"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -89,9 +89,9 @@
                                     <Border Width="48" Height="3" CornerRadius="2" Background="{StaticResource AppAccentBrush}" HorizontalAlignment="Left" Margin="0,2,0,2"/>
                                     <TextBlock Text="{x:Bind T.HeroSubtitle, Mode=OneWay}" Style="{StaticResource SubtleTextStyle}" MaxWidth="560" FontSize="14"/>
                                     <StackPanel x:Name="HeroActions" Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
-                                        <Button Content="{x:Bind T.TestAll, Mode=OneWay}" Click="TestAll_Click" Style="{StaticResource AccentButtonStyle}"/>
-                                        <Button Content="{x:Bind T.SmartNow, Mode=OneWay}" Click="SmartRunNow_Click" Style="{StaticResource SecondaryActionButtonStyle}"/>
-                                        <Button Content="{x:Bind T.RestoreDns, Mode=OneWay}" Click="Restore_Click" Style="{StaticResource SecondaryActionButtonStyle}"/>
+                                        <Button Content="{x:Bind T.TestAll, Mode=OneWay}" Click="TestAll_Click" Background="{StaticResource AppAccentBrush}" Foreground="{StaticResource AppOnAccentBrush}" CornerRadius="10" Padding="16,9" FontWeight="SemiBold"/>
+                                        <Button Content="{x:Bind T.SmartNow, Mode=OneWay}" Click="SmartRunNow_Click" CornerRadius="10" Padding="14,8"/>
+                                        <Button Content="{x:Bind T.RestoreDns, Mode=OneWay}" Click="Restore_Click" CornerRadius="10" Padding="14,8"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <Border x:Name="HeroVisual" Grid.Column="1" Width="176" Height="140" CornerRadius="24"
@@ -171,7 +171,7 @@
                                                 <TextBlock x:Name="BestServicesText" Text="Services: —" Opacity="0.7" FontSize="12"/>
                                             </StackPanel>
                                         </StackPanel>
-                                        <Button x:Name="ConnectBestButton" Grid.Column="1" Content="{x:Bind T.Connect, Mode=OneWay}" Click="ConnectBest_Click" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center" />
+                                        <Button x:Name="ConnectBestButton" Grid.Column="1" Content="{x:Bind T.Connect, Mode=OneWay}" Click="ConnectBest_Click" Background="{StaticResource AppAccentBrush}" Foreground="{StaticResource AppOnAccentBrush}" CornerRadius="10" Padding="16,9" FontWeight="SemiBold" VerticalAlignment="Center" />
                                     </Grid>
                                 </Border>
 
@@ -223,8 +223,8 @@
                                 <TextBlock x:Name="ListCoverageText" Text="" FontSize="12" Opacity="0.48" TextWrapping="Wrap" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
-                                <Button Content="{x:Bind T.AddCustom, Mode=OneWay}" Click="AddCustomDns_Click" Style="{StaticResource SecondaryActionButtonStyle}" />
-                                <Button Content="{x:Bind T.TestSection, Mode=OneWay}" Click="TestVisible_Click" Style="{StaticResource AccentButtonStyle}" />
+                                <Button Content="{x:Bind T.AddCustom, Mode=OneWay}" Click="AddCustomDns_Click" CornerRadius="10" Padding="14,8" />
+                                <Button Content="{x:Bind T.TestSection, Mode=OneWay}" Click="TestVisible_Click" Background="{StaticResource AppAccentBrush}" Foreground="{StaticResource AppOnAccentBrush}" CornerRadius="10" Padding="16,9" FontWeight="SemiBold" />
                             </StackPanel>
                         </Grid>
 
@@ -278,8 +278,8 @@
                                                 </StackPanel>
                                             </StackPanel>
                                             <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center" MinWidth="92">
-                                                <Button Content="{x:Bind ConnectLabel, Mode=OneWay}" Click="ConnectProvider_Click" Style="{StaticResource AccentButtonStyle}" Padding="14,7" HorizontalAlignment="Stretch" />
-                                                <Button Content="{x:Bind TestLabel, Mode=OneWay}" Click="TestProvider_Click" Style="{StaticResource SecondaryActionButtonStyle}" HorizontalAlignment="Stretch" />
+                                                <Button Content="{x:Bind ConnectLabel, Mode=OneWay}" Click="ConnectProvider_Click" Background="{StaticResource AppAccentBrush}" Foreground="{StaticResource AppOnAccentBrush}" CornerRadius="10" FontWeight="SemiBold" Padding="14,7" HorizontalAlignment="Stretch" />
+                                                <Button Content="{x:Bind TestLabel, Mode=OneWay}" Click="TestProvider_Click" CornerRadius="10" Padding="14,8" HorizontalAlignment="Stretch" />
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -298,7 +298,7 @@
                                 <Grid ColumnSpacing="10" Margin="0,6,0,0">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <TextBox x:Name="SiteAddressBox" PlaceholderText="{x:Bind T.SitePlaceholder, Mode=OneWay}" FlowDirection="LeftToRight" HorizontalContentAlignment="Left" FontFamily="Consolas" CornerRadius="10" />
-                                    <Button x:Name="SiteTestButton" Grid.Column="1" Content="{x:Bind T.TestAll, Mode=OneWay}" Click="TestSite_Click" Style="{StaticResource AccentButtonStyle}" />
+                                    <Button x:Name="SiteTestButton" Grid.Column="1" Content="{x:Bind T.TestAll, Mode=OneWay}" Click="TestSite_Click" Background="{StaticResource AppAccentBrush}" Foreground="{StaticResource AppOnAccentBrush}" CornerRadius="10" Padding="16,9" FontWeight="SemiBold" />
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -330,7 +330,7 @@
                                                     <TextBlock Text="{x:Bind ResolvedText, Mode=OneWay}" FlowDirection="LeftToRight" FontFamily="Consolas" FontSize="11" Opacity="0.55" TextTrimming="CharacterEllipsis" />
                                                     <TextBlock Text="{x:Bind Details, Mode=OneWay}" TextWrapping="Wrap" Opacity="0.65" />
                                                 </StackPanel>
-                                                <Button Grid.Column="1" Content="{x:Bind ConnectLabel, Mode=OneWay}" Click="ConnectSiteResult_Click" Style="{StaticResource AccentButtonStyle}" Padding="14,7" VerticalAlignment="Center" />
+                                                <Button Grid.Column="1" Content="{x:Bind ConnectLabel, Mode=OneWay}" Click="ConnectSiteResult_Click" Background="{StaticResource AppAccentBrush}" Foreground="{StaticResource AppOnAccentBrush}" CornerRadius="10" FontWeight="SemiBold" Padding="14,7" VerticalAlignment="Center" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -356,8 +356,8 @@
                                     <TextBlock Text="{x:Bind T.LanguageTitle, Mode=OneWay}" Style="{StaticResource SectionTitleStyle}"/>
                                     <TextBlock Text="{x:Bind T.LanguageHint, Mode=OneWay}" Style="{StaticResource SubtleTextStyle}" FontSize="12"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Button x:Name="SettingsLanguageFaButton" Content="{x:Bind T.LangFa, Mode=OneWay}" Click="LanguageFa_Click" Style="{StaticResource LangButtonStyle}"/>
-                                        <Button x:Name="SettingsLanguageEnButton" Content="{x:Bind T.LangEn, Mode=OneWay}" Click="LanguageEn_Click" Style="{StaticResource LangButtonStyle}"/>
+                                        <Button x:Name="SettingsLanguageFaButton" Content="{x:Bind T.LangFa, Mode=OneWay}" Click="LanguageFa_Click" CornerRadius="8" Padding="12,6" MinWidth="72" FontSize="12"/>
+                                        <Button x:Name="SettingsLanguageEnButton" Content="{x:Bind T.LangEn, Mode=OneWay}" Click="LanguageEn_Click" CornerRadius="8" Padding="12,6" MinWidth="72" FontSize="12"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -386,19 +386,19 @@
                                     </Grid>
                                     <TextBlock Text="{x:Bind T.FontHint, Mode=OneWay}" FontSize="11" Opacity="0.5" TextWrapping="Wrap"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Button Tag="Paper" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}" Padding="10">
+                                        <Button Tag="Paper" Click="ThemeButton_Click" CornerRadius="10" Padding="10">
                                             <StackPanel Spacing="6">
                                                 <Border Width="92" Height="36" CornerRadius="8" Background="#F3F0E8" BorderBrush="#D7D2C6" BorderThickness="1"/>
                                                 <TextBlock Text="{x:Bind T.ThemePaper, Mode=OneWay}" HorizontalAlignment="Center" FontSize="12"/>
                                             </StackPanel>
                                         </Button>
-                                        <Button Tag="Ink" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}" Padding="10">
+                                        <Button Tag="Ink" Click="ThemeButton_Click" CornerRadius="10" Padding="10">
                                             <StackPanel Spacing="6">
                                                 <Border Width="92" Height="36" CornerRadius="8" Background="#121417"/>
                                                 <TextBlock Text="{x:Bind T.ThemeInk, Mode=OneWay}" HorizontalAlignment="Center" FontSize="12"/>
                                             </StackPanel>
                                         </Button>
-                                        <Button Tag="Signal" Click="ThemeButton_Click" Style="{StaticResource SecondaryActionButtonStyle}" Padding="10">
+                                        <Button Tag="Signal" Click="ThemeButton_Click" CornerRadius="10" Padding="10">
                                             <StackPanel Spacing="6">
                                                 <Border Width="92" Height="36" CornerRadius="8" Background="#0B1C1A"/>
                                                 <TextBlock Text="{x:Bind T.ThemeSignal, Mode=OneWay}" HorizontalAlignment="Center" FontSize="12"/>
@@ -460,7 +460,7 @@
                                                 <TextBlock Text="{x:Bind T.MonitorStatus, Mode=OneWay}" FontSize="11" Opacity="0.5"/>
                                                 <TextBlock x:Name="SmartAutoStatusText" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                             </StackPanel>
-                                            <Button Grid.Column="1" Content="{x:Bind T.RunNow, Mode=OneWay}" Click="SmartRunNow_Click" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center"/>
+                                            <Button Grid.Column="1" Content="{x:Bind T.RunNow, Mode=OneWay}" Click="SmartRunNow_Click" Background="{StaticResource AppAccentBrush}" Foreground="{StaticResource AppOnAccentBrush}" CornerRadius="10" Padding="16,9" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Border>
                                     <TextBlock Text="{x:Bind T.SmartExplain, Mode=OneWay}" Style="{StaticResource SubtleTextStyle}" FontSize="12"/>
@@ -491,7 +491,7 @@
                                             <TextBlock Text="{x:Bind T.UpdateUrlLabel, Mode=OneWay}" Opacity="0.62"/>
                                             <TextBox x:Name="UpdateUrlBox" PlaceholderText="https://github.com/.../blob/main/dns.json" TextChanged="UpdateUrlBox_TextChanged" LostFocus="UpdateUrlBox_LostFocus" FlowDirection="LeftToRight" CornerRadius="8"/>
                                         </StackPanel>
-                                        <Button Grid.Column="1" Content="{x:Bind T.DefaultSource, Mode=OneWay}" Click="ResetGithubSource_Click" VerticalAlignment="Bottom" Style="{StaticResource SecondaryActionButtonStyle}"/>
+                                        <Button Grid.Column="1" Content="{x:Bind T.DefaultSource, Mode=OneWay}" Click="ResetGithubSource_Click" VerticalAlignment="Bottom" CornerRadius="10" Padding="14,8"/>
                                     </Grid>
                                     <Grid ColumnSpacing="10">
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
@@ -510,8 +510,8 @@
                                         </StackPanel>
                                     </Grid>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Button Content="{x:Bind T.CheckUpdate, Mode=OneWay}" Click="ManualUpdate_Click" Style="{StaticResource AccentButtonStyle}"/>
-                                        <Button Content="{x:Bind T.AddCustom, Mode=OneWay}" Click="AddCustomDns_Click" Style="{StaticResource SecondaryActionButtonStyle}"/>
+                                        <Button Content="{x:Bind T.CheckUpdate, Mode=OneWay}" Click="ManualUpdate_Click" Background="{StaticResource AppAccentBrush}" Foreground="{StaticResource AppOnAccentBrush}" CornerRadius="10" Padding="16,9" FontWeight="SemiBold"/>
+                                        <Button Content="{x:Bind T.AddCustom, Mode=OneWay}" Click="AddCustomDns_Click" CornerRadius="10" Padding="14,8"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -525,8 +525,8 @@
                                     <InfoBar IsOpen="True" IsClosable="False" Severity="Informational" CornerRadius="10"
                                              Title="{x:Bind T.RestoreNoteTitle, Mode=OneWay}" Message="{x:Bind T.RestoreNoteMessage, Mode=OneWay}"/>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <Button Content="{x:Bind T.RestoreAdapter, Mode=OneWay}" Click="Restore_Click" Style="{StaticResource SecondaryActionButtonStyle}"/>
-                                        <Button Content="{x:Bind T.RestoreAll, Mode=OneWay}" Click="RestoreAll_Click" Style="{StaticResource SecondaryActionButtonStyle}"/>
+                                        <Button Content="{x:Bind T.RestoreAdapter, Mode=OneWay}" Click="Restore_Click" CornerRadius="10" Padding="14,8"/>
+                                        <Button Content="{x:Bind T.RestoreAll, Mode=OneWay}" Click="RestoreAll_Click" CornerRadius="10" Padding="14,8"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>

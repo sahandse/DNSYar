@@ -77,28 +77,6 @@
                 <Setter Property="Foreground" Value="{StaticResource AppAccentTextBrush}" />
             </Style>
 
-            <Style x:Key="LangButtonStyle" TargetType="Button">
-                <Setter Property="CornerRadius" Value="8" />
-                <Setter Property="Padding" Value="12,6" />
-                <Setter Property="MinWidth" Value="72" />
-                <Setter Property="FontSize" Value="12" />
-            </Style>
-
-            <Style x:Key="PrimaryActionButtonStyle" TargetType="Button">
-                <Setter Property="CornerRadius" Value="10" />
-                <Setter Property="Padding" Value="16,9" />
-                <Setter Property="FontWeight" Value="SemiBold" />
-            </Style>
-
-            <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryActionButtonStyle}">
-                <Setter Property="Background" Value="{StaticResource AppAccentBrush}" />
-                <Setter Property="Foreground" Value="{StaticResource AppOnAccentBrush}" />
-            </Style>
-
-            <Style x:Key="SecondaryActionButtonStyle" TargetType="Button">
-                <Setter Property="CornerRadius" Value="10" />
-                <Setter Property="Padding" Value="14,8" />
-            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
