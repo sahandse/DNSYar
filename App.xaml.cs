@@ -15,7 +15,6 @@ public partial class App : Application
         try
         {
             InitializeComponent();
-            Resources["T"] = UiText.Current;
         }
         catch (Exception ex)
         {

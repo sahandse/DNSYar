@@ -1,3 +1,7 @@
+## 0.8.3
+- Removed the unnecessary managed `UiText` object assignment to `Application.Resources`, which caused startup COMException `0x8000FFFF` on affected Windows systems.
+- The bilingual UI continues to use the strongly typed `MainWindow.T` property through `x:Bind`.
+
 ## 0.8.2
 - Fixed the silent startup failure caused by custom WinUI button styles during application resource loading.
 - Windows App SDK is now self-contained by default, including local/manual publish commands.
